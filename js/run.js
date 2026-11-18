@@ -1,5 +1,5 @@
 /* Laufender Timer: Ablaufsteuerung, Anzeige, Bedienung, Ergebnis-Screen.
-   Die Bedienlogik ist in docs/bedienlogik.md als Matrix beschrieben. */
+   Die Bedienlogik ist in tests/features/ als ausführbare Spec beschrieben. */
 import {$,fmt,ledTime,clone} from './util.js';
 import {setLed} from './led.js';
 import {S,D,save,saveHist,saveCount} from './state.js';
