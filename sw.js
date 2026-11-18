@@ -1,5 +1,5 @@
 /* wod-clock service worker: works offline after the first visit */
-const CACHE = 'wod-clock-v1';
+const CACHE = 'wod-clock-v2';
 const ASSETS = [
   './',
   './index.html',

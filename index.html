@@ -476,7 +476,8 @@ $('#vSaved').addEventListener('click',e=>{
 /* ================= sound: Box-Buzzer ================= */
 let ac=null,master=null;
 function audioInit(){
-  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  /* 'ambient' mischt sich mit laufender Musik (Spotify/Apple Music), statt sie wie 'playback' zu unterbrechen */
+  try{if(navigator.audioSession)navigator.audioSession.type='ambient'}catch(e){}
   try{if(!ac){ac=new(window.AudioContext||window.webkitAudioContext)();const comp=ac.createDynamicsCompressor();master=ac.createGain();master.gain.value=.9;master.connect(comp);comp.connect(ac.destination);
       const b=ac.createBuffer(1,1,22050),s=ac.createBufferSource();s.buffer=b;s.connect(ac.destination);s.start(0)}
     if(ac.state!=='running')ac.resume()}catch(e){}}
@@ -499,7 +500,10 @@ const vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 let wl=null;
 async function wake(){try{if('wakeLock' in navigator)wl=await navigator.wakeLock.request('screen')}catch(e){}}
 function unwake(){try{wl&&wl.release()}catch(e){}wl=null}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&R.active&&!R.done){wake();if(ac&&ac.state!=='running')ac.resume()}});
+function audioSleep(){try{if(ac&&ac.state==='running')ac.suspend()}catch(e){}}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){if(R.active&&!R.done){wake();if(ac&&ac.state!=='running')ac.resume()}}
+  else if(!R.active||R.done)audioSleep()});
 
 /* ================= engine ================= */
 let R={};
@@ -616,7 +620,7 @@ function undoFinish(){
   R.res.pop();R.workTotal-=u.el;R.laps.pop();R.t0=u.t0;R.done=false;R.last=null;
   $('#fin').classList.remove('show');$('#run').style.setProperty('--led',LED.work);R.infoKey='';
   audioInit();SND.lap();wake();loop()}
-function closeRun(){R.active=false;R.done=true;unwake();$('#run').classList.remove('show');renderSetup()}
+function closeRun(){R.active=false;R.done=true;unwake();audioSleep();$('#run').classList.remove('show');renderSetup()}
 $('#rClose').onclick=()=>{
   if(!R.done&&Date.now()-R.arm>2500){R.arm=Date.now();const t=$('#rTitle');t.textContent='Nochmal tippen zum Beenden';setTimeout(()=>{if(R.active&&!R.done)t.textContent=notation(R.m,R.c)},2500);return}
   closeRun()};
