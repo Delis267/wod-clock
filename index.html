@@ -189,6 +189,7 @@ h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.01em}
 .splits .row b{font-size:19px;font-weight:600;color:#ececea;line-height:1.2}
 .splits .row.best b{color:var(--led2)}
 .rctl{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.rctl.off{visibility:hidden}
 .hgrid:has(.cG.hide) .cR{grid-column:1/-1}
 .rctl .rk{height:52px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:600;flex:1;max-width:220px}
 .fin{position:absolute;inset:0;background:#000;display:none;flex-direction:column;justify-content:center;gap:16px;z-index:3;
@@ -562,6 +563,7 @@ function draw(s,el,rem){
   let rv=0,gv=0;
   if(m==='tabata'||m==='emom'){rv=s.r||1;gv=c.rounds}else{rv=R.laps.length;gv=c.rounds||0}
   setLed($('#ledR'),String(rv).padStart(2,' '));if(gv)setLed($('#ledG'),String(gv).padStart(2,' '));
+  $('#rCtl').classList.toggle('off',s.k!=='work');
   $('#lpP').classList.toggle('on',s.k==='prep');$('#lpW').classList.toggle('on',s.k==='work');$('#lpR').classList.toggle('on',s.k==='rest'||s.k==='setrest');
   let fr='';
   if(R.paused)fr='Pausiert';
@@ -573,12 +575,12 @@ function draw(s,el,rem){
   $('#footR').textContent=fr;
   const key=`${R.laps.length}|${s.k}|${R.paused}`;
   if(R.infoKey!==key){R.infoKey=key;let h='';
-    if(R.paused){h=`<div class="hint"><i></i>${lapMode(m)?'Lange halten':'Antippen'} setzt fort</div>`}
+    if(R.paused){h=`<div class="hint"><i></i>${lapMode(m)&&s.k==='work'?'Lange halten':'Antippen'} setzt fort</div>`}
     else if(lapMode(m)&&s.k==='work'){
       const sp=R.laps.map((t,i)=>[i+1,t-(R.laps[i-1]||0),t]);
       const best=sp.length>1?Math.min(...sp.map(x=>x[1])):-1;
       h=`<div class="hint"><i></i>Tippen zählt eine Runde, lange halten pausiert</div>`+(sp.length?`<div class="splits"><div class="sh2"><span>Runde</span><span>Zeit</span><span>Gesamt</span></div><div class="list2">${sp.slice().reverse().map(([n,d,t])=>`<div class="row${d===best?' best':''}"><span>${n}</span><b>${fmt(d)}</b><span>${fmt(t)}</span></div>`).join('')}</div></div>`:'')}
-    else if(s.k!=='prep')h=`<div class="hint"><i></i>${lapMode(m)?'Lange halten pausiert':'Uhr antippen pausiert'}</div>`;
+    else h=`<div class="hint"><i></i>Uhr antippen pausiert</div>`;
     $('#rInfo').innerHTML=h}
 }
 function tapClock(){
@@ -588,7 +590,8 @@ function tapClock(){
     const h=$('#clock');h.classList.add('flash');setTimeout(()=>h.classList.remove('flash'),160);
     if(R.m==='fortime'&&R.c.rounds&&R.laps.length>=R.c.rounds){R.undo={t0:R.t0,el:t};return advance(t)}
     draw(s,t,s.dur-t);return}
-  if(!lapMode(R.m))togglePause()}
+  /* außerhalb der Arbeitsphase (Countdown, Satzpause) pausiert ein Tippen in jedem Modus */
+  if(!lapMode(R.m)||s.k!=='work')togglePause()}
 function togglePause(){if(R.done)return;audioInit();
   if(!R.paused){R.paused=true;R.pAt=performance.now();$('#run').classList.add('paused')}
   else{R.t0+=performance.now()-R.pAt;R.paused=false;$('#run').classList.remove('paused')}
@@ -599,7 +602,7 @@ function undoLap(){if(R.done||!R.laps.length||R.seg[R.i].k!=='work')return;R.lap
   ['pointerup','pointerleave','pointercancel'].forEach(t=>el.addEventListener(t,()=>clearTimeout(lp)));
   el.addEventListener('contextmenu',e=>e.preventDefault());
   el.onclick=()=>{if(fired){fired=false;return}
-    if(lapMode(R.m)&&R.paused)return;tapClock()}})();
+    if(lapMode(R.m)&&R.paused&&R.seg[R.i].k==='work')return;tapClock()}})();
 function finish(completed){
   R.done=true;unwake();SND.end();vib([400,120,400]);
   if(completed){COUNT++;store.set('count',COUNT)}
