@@ -1,2 +1,95 @@
-# wod-clock
-simple functional fitness timer
+<p align="center">
+  <img src="icons/icon-512.png" width="120" alt="wod-clock Icon">
+</p>
+
+<h1 align="center">wod-clock</h1>
+
+<p align="center">
+  Minimalistischer Workout-Timer für CrossFit und Functional Fitness.<br>
+  For Time, AMRAP, EMOM und Tabata – im Look der LED-Wanduhr aus der Box.
+</p>
+
+<p align="center">
+  <b><a href="https://delis267.github.io/wod-clock/">→ Timer öffnen</a></b>
+</p>
+
+<p align="center">
+  <img src="screenshots/einstellen.png" width="240" alt="Timer einstellen">
+  &nbsp;
+  <img src="screenshots/for-time.png" width="240" alt="For Time mit Rundenzähler">
+</p>
+<p align="center">
+  <img src="screenshots/amrap-quer.png" width="500" alt="AMRAP im Querformat">
+</p>
+
+## Funktionen
+
+- **Vier Modi**
+  - **For Time** – Stoppuhr mit optionalem Time Cap und Rundenziel (z. B. 5 RFT)
+  - **AMRAP** – Dauer frei wählbar, optional mehrere Sätze mit Pause dazwischen
+  - **EMOM** – jede Runde startet im gewählten Intervall (EMOM, E2MOM, E3MOM …)
+  - **Tabata** – Arbeit, Pause, Runden und Sätze; Standard ist klassisch 20/10 × 8
+- **7-Segment-Wanduhr** hochkant und quer, Rot für Arbeit, Grün für Pause, Bernstein für Runden
+- **Uhr antippen**
+  - AMRAP / For Time: Tippen zählt eine Runde, lange halten pausiert
+  - EMOM / Tabata: Tippen pausiert
+  - Zwischenzeiten pro Runde, schnellste Runde markiert, „Zurück“ für Fehltipps
+- **Box-Buzzer**: 3-2-1-Piepen, Buzzer bei Start und Ende, Doppelpiep 10 s vor Schluss
+- **Gespeichert**: Workout-Zähler, Favoriten und die letzten 10 Timer in CrossFit-Kurzschreibweise
+- **Hell- und Dunkelmodus** (automatisch oder fest), läuft ohne Scrollen auf dem Handy
+- **Offline-fähig** nach dem ersten Aufruf, installierbar auf dem Home-Bildschirm
+
+## Auf dem Handy installieren
+
+1. Link im Browser öffnen
+2. **iPhone (Safari):** Teilen → „Zum Home-Bildschirm“
+   **Android (Chrome):** Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“
+3. wod-clock vom Home-Bildschirm starten – dann im Vollbild ohne Browserleiste
+
+## Technik
+
+- Eine HTML-Datei mit Vanilla JavaScript, kein Framework
+- Töne werden live mit der Web Audio API erzeugt, keine Sounddateien
+- Speicherung in `localStorage`, keine Server, kein Tracking
+- Schriften: Archivo und Barlow Condensed über Google Fonts (SIL Open Font License)
+
+## Auf GitHub Pages veröffentlichen
+
+Das Repo bringt einen fertigen GitHub-Actions-Workflow mit (`.github/workflows/pages.yml`).
+Er veröffentlicht die Seite bei jedem Push auf `main` automatisch.
+
+1. Neues öffentliches Repository `wod-clock` anlegen
+2. Alle Dateien dieses Ordners hochladen, inklusive `.github/` (Struktur unten)
+3. **Settings → Pages → Build and deployment → Source: GitHub Actions**
+4. Unter **Actions** läuft „Deploy to GitHub Pages“ – nach ca. 1 Minute ist der Timer erreichbar unter
+   `https://delis267.github.io/wod-clock/`
+
+```
+wod-clock/
+├── .github/workflows/
+│   └── pages.yml          # Build & Deploy auf GitHub Pages
+├── index.html             # die komplette App (HTML, CSS, JS)
+├── sw.js                  # Service Worker für Offline-Nutzung
+├── manifest.webmanifest   # Name, Icons, Vollbild für den Home-Bildschirm
+├── .nojekyll              # nur nötig, falls ohne Actions direkt aus dem Branch veröffentlicht wird
+├── icons/                 # App-Icons und Favicon
+├── screenshots/           # Bilder für diese README
+├── README.md
+└── LICENSE
+```
+
+### Updates veröffentlichen (Cache updaten)
+
+Datei ändern, committen, pushen – fertig. Der Workflow setzt bei jedem Deploy automatisch eine
+neue Cache-Version in `sw.js` (Commit-Hash), damit installierte Apps das Update beim nächsten Öffnen laden.
+
+<details>
+<summary>Alternative ohne Actions</summary>
+
+Settings → Pages → Source: **Deploy from a branch**, Branch `main`, Ordner `/ (root)`.
+Dann bei jedem Update in `sw.js` die Versionsnummer von Hand erhöhen, z. B. `wod-clock-v2`.
+</details>
+
+## Lizenz
+
+[MIT](LICENSE)
