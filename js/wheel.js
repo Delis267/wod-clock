@@ -1,7 +1,7 @@
 /* Scrollrad-Dialog für Minuten und Sekunden */
 import {$} from './util.js';
 
-export const FIELDS={work:'Arbeit',rest:'Pause',setRest:'Pause zwischen Sätzen',dur:'Dauer',every:'Intervall',cap:'Time Cap',prep:'Countdown'};
+export const FIELDS={work:'Work',rest:'Rest',setRest:'Rest zwischen Sätzen',dur:'Dauer',every:'Intervall',cap:'Time Cap',prep:'Countdown'};
 const MIN={work:5,rest:0,setRest:0,dur:30,every:10,cap:0,prep:0};
 
 let sheetCb=null,wM=null,wS=null;

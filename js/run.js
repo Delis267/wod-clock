@@ -23,7 +23,6 @@ function start(){
   $('#rTitle').textContent=notation(m,c);
   $('#cG').classList.toggle('hide',!(m==='tabata'||m==='emom'||(m==='fortime'&&c.rounds)));
   $('#lR').textContent=lapMode(m)?'Runden':'Runde';$('#lG').textContent=m==='fortime'?'Ziel':'von';
-  $('#lT').textContent=m==='fortime'?'Zeit':'Noch';
   /* einziger Knopf unter der Uhr: Fertig bei For Time (mit Bestätigung) */
   $('#rCtl').innerHTML=m==='fortime'?`<button class="rk" id="bDone">Fertig</button>`:'';
   $('#rCtl').classList.toggle('hide',m!=='fortime');$('#run').classList.toggle('nolap',m!=='fortime');if($('#bDone'))$('#bDone').onclick=e=>{const b=e.currentTarget,s=R.seg[R.i];if(s.k!=='work'||R.done)return;
@@ -59,13 +58,13 @@ function draw(s,el,rem){
   if(m==='tabata'||m==='emom'){rv=s.r||1;gv=c.rounds}else{rv=R.laps.length;gv=c.rounds||0}
   setLed($('#ledR'),String(rv).padStart(2,' '));if(gv)setLed($('#ledG'),String(gv).padStart(2,' '));
   $('#rCtl').classList.toggle('off',s.k!=='work');
-  $('#lpP').classList.toggle('on',s.k==='prep');$('#lpW').classList.toggle('on',s.k==='work');$('#lpR').classList.toggle('on',s.k==='rest'||s.k==='setrest');
+  setPhase(s);
   let fr='';
   if(R.paused)fr='Pausiert';
   else if(s.k==='prep')fr='Gleich geht’s los';
-  else if(m==='tabata'){fr=s.k==='setrest'?'Satzpause':(c.sets>1?`Satz ${s.set} von ${c.sets}`:(s.k==='work'&&c.rest&&s.r<c.rounds?`Danach ${fmt(c.rest)} Pause`:''))}
+  else if(m==='tabata'){fr=s.k==='setrest'?'Rest zwischen Sätzen':(c.sets>1?`Satz ${s.set} von ${c.sets}`:(s.k==='work'&&c.rest&&s.r<c.rounds?`Danach ${fmt(c.rest)} Rest`:''))}
   else if(m==='emom'){const left=R.seg.slice(R.i+1).reduce((a,x)=>a+x.dur,0)+rem;fr=`Gesamt noch ${fmt(left)}`}
-  else if(s.k==='setrest'){const nx=R.seg[R.i+1];fr=`Satzpause, gleich Satz ${nx?nx.set:''}`}
+  else if(s.k==='setrest'){const nx=R.seg[R.i+1];fr=`Rest, gleich Satz ${nx?nx.set:''}`}
   else{const n=R.laps.length;fr=n?`Letzte Runde ${fmt(R.laps[n-1]-(R.laps[n-2]||0))}`:(m==='fortime'?(c.cap?`Cap ${fmt(c.cap)}`:'ohne Cap'):'');if(m==='amrap'&&c.sets>1)fr=`Satz ${s.set} von ${c.sets}`+(fr?`, ${fr}`:'')}
   $('#footR').textContent=fr;
   const key=`${R.laps.length}|${s.k}|${R.paused}|${R.delArm?R.delArm.i:-1}`;
@@ -83,6 +82,8 @@ function draw(s,el,rem){
     $('#rInfo').innerHTML=h;
     const nw=$('#rInfo .list2');if(nw)nw.scrollTop=top}
 }
+/* Phase oben in der Uhr: WORK oder REST, im Countdown leer */
+function setPhase(s){const t=$('#lT'),txt=s.k==='work'?'WORK':(s.k==='prep'?'':'REST');if(t.textContent!==txt)t.textContent=txt}
 function redraw(){const s=R.seg[R.i],el=segEl();draw(s,el,s.dur-el)}
 
 /* Fehltipp löschen: 1. Tippen aufs × markiert die Zeile, 2. Tippen innerhalb von 2,5 s löscht.
@@ -103,7 +104,7 @@ function tapClock(){
     const h=$('#clock');h.classList.add('flash');setTimeout(()=>h.classList.remove('flash'),160);
     if(R.m==='fortime'&&R.c.rounds&&R.laps.length>=R.c.rounds){R.undo={t0:R.t0,el:t};return advance(t)}
     draw(s,t,s.dur-t);return}
-  /* außerhalb der Arbeitsphase (Countdown, Satzpause) pausiert ein Tippen in jedem Modus */
+  /* außerhalb von WORK (Countdown, Rest) pausiert ein Tippen in jedem Modus */
   if(!lapMode(R.m)||s.k!=='work')togglePause()}
 function togglePause(){if(R.done)return;audioInit();
   if(!R.paused){R.paused=true;R.pAt=performance.now();$('#run').classList.add('paused')}
@@ -127,7 +128,7 @@ function finish(completed){
     else{title='Time!';led=ledTime(r.el);rows=`<div><span>Deine Zeit</span>${fmt(r.el)}</div>`+(r.laps?`<div><span>Runden</span>${r.laps}</div>`:'')}}
   else if(m==='amrap'){const sum=R.res.reduce((a,r)=>a+r.laps,0);title='Time!';led=String(sum).padStart(2,' ');
     rows=R.res.length>1?R.res.map((r,i)=>`<div><span>Satz ${i+1}</span>${r.laps} Runden</div>`).join('')+`<div><span>Gesamt</span>${sum} Runden</div>`:`<div><span>Runden in ${fmt(c.dur)}</span>${sum}</div>`}
-  else rows=`<div><span>Arbeitszeit</span>${fmt(R.workTotal)}</div><div><span>Workouts insgesamt</span>${D.count}</div>`;
+  else rows=`<div><span>Work gesamt</span>${fmt(R.workTotal)}</div><div><span>Workouts insgesamt</span>${D.count}</div>`;
   $('#fT').textContent=title;$('#fS').textContent=sub;setLed($('#ledF'),led);$('#fR').innerHTML=rows;
   $('#fUndo').classList.toggle('hide',!R.undo);
   $('#fin').classList.add('show')}

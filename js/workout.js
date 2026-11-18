@@ -17,8 +17,8 @@ export function notation(m,c){
   if(m==='emom'){if(c.every===60)return `EMOM ${c.rounds}`;const e=c.every%60===0?c.every/60:fmt(c.every);return `E${e}MOM × ${c.rounds}`}
   return c.rounds?`${c.rounds} RFT`:'For Time'}
 export function detail(m,c){
-  if(m==='tabata')return (c.sets>1?`${fmt(c.setRest)} Satzpause, `:'')+`${fmt(total(m,c))} gesamt`;
-  if(m==='amrap')return c.sets>1?`${fmt(c.setRest)} Pause dazwischen, ${fmt(total(m,c))} gesamt`:'So viele Runden wie möglich';
+  if(m==='tabata')return (c.sets>1?`${fmt(c.setRest)} Rest zwischen Sätzen, `:'')+`${fmt(total(m,c))} gesamt`;
+  if(m==='amrap')return c.sets>1?`${fmt(c.setRest)} Rest dazwischen, ${fmt(total(m,c))} gesamt`:'So viele Runden wie möglich';
   if(m==='emom')return `${fmt(total(m,c))} gesamt`;
   return c.cap?`Cap ${c.cap%60===0?c.cap/60:fmt(c.cap)}`:'ohne Cap'}
 

@@ -32,20 +32,20 @@ export function renderSetup(){
   let h='';
   if(m==='tabata'){
     h=`<div class="card" style="padding:12px 14px 4px"><div class="lab" style="margin-bottom:8px">Eine Runde</div>
-      <div class="blocks"><button class="block" data-pick="tabata.work"><span class="k"><i class="dot"></i>Arbeit</span><span class="v">${fmt(c.work)}</span></button>
-      <button class="block rest" data-pick="tabata.rest"><span class="k"><i class="dot"></i>Pause</span><span class="v">${fmt(c.rest)}</span></button></div>
+      <div class="blocks"><button class="block" data-pick="tabata.work"><span class="k"><i class="dot"></i>Work</span><span class="v">${fmt(c.work)}</span></button>
+      <button class="block rest" data-pick="tabata.rest"><span class="k"><i class="dot"></i>Rest</span><span class="v">${fmt(c.rest)}</span></button></div>
       <div style="margin:0 -14px">${stepper('tabata.rounds','Runden',c.rounds)}</div></div>
       <div class="card">${stepper('tabata.sets','Sätze',c.sets,'Alle Runden noch einmal')}
-      ${c.sets>1?`<button class="rowx" data-pick="tabata.setRest"><span style="display:flex;align-items:center;gap:8px"><i class="dot" style="background:var(--grn);opacity:.55"></i>Pause zwischen Sätzen</span><span class="val">${fmt(c.setRest)}</span></button>`:''}</div>
+      ${c.sets>1?`<button class="rowx" data-pick="tabata.setRest"><span style="display:flex;align-items:center;gap:8px"><i class="dot" style="background:var(--grn);opacity:.55"></i>Rest zwischen Sätzen</span><span class="val">${fmt(c.setRest)}</span></button>`:''}</div>
       ${timeline(m,c)}`}
   if(m==='amrap'){
     h=bigCard('amrap.dur','So viele Runden wie möglich in',fmt(c.dur),'Antippen zum Ändern')+
       chips('amrap.dur',[[300,'5 min'],[600,'10 min'],[720,'12 min'],[900,'15 min'],[1200,'20 min']],c.dur)+
-      `<div class="card">${stepper('amrap.sets','Sätze',c.sets,'Mehrere AMRAPs mit Pause dazwischen')}
-      ${c.sets>1?`<button class="rowx" data-pick="amrap.setRest"><span style="display:flex;align-items:center;gap:8px"><i class="dot" style="background:var(--grn);opacity:.55"></i>Pause zwischen Sätzen</span><span class="val">${fmt(c.setRest)}</span></button>`:''}</div>`+
+      `<div class="card">${stepper('amrap.sets','Sätze',c.sets,'Mehrere AMRAPs mit Rest dazwischen')}
+      ${c.sets>1?`<button class="rowx" data-pick="amrap.setRest"><span style="display:flex;align-items:center;gap:8px"><i class="dot" style="background:var(--grn);opacity:.55"></i>Rest zwischen Sätzen</span><span class="val">${fmt(c.setRest)}</span></button>`:''}</div>`+
       (c.sets>1?timeline(m,c):'')}
   if(m==='emom'){
-    h=bigCard('emom.every','Jede Runde startet alle',fmt(c.every),'Was übrig bleibt, ist deine Pause')+
+    h=bigCard('emom.every','Jede Runde startet alle',fmt(c.every),'Was übrig bleibt, ist dein Rest')+
       chips('emom.every',[[30,'0:30'],[60,'1:00'],[90,'1:30'],[120,'2:00'],[180,'3:00']],c.every)+
       `<div class="card">${stepper('emom.rounds','Runden',c.rounds)}</div>`+timeline(m,c)}
   if(m==='fortime'){

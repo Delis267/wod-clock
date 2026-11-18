@@ -26,10 +26,10 @@
 
 - **Vier Modi**
   - **For Time** – Stoppuhr mit optionalem Time Cap und Rundenziel (z. B. 5 RFT)
-  - **AMRAP** – Dauer frei wählbar, optional mehrere Sätze mit Pause dazwischen
+  - **AMRAP** – Dauer frei wählbar, optional mehrere Sätze mit Rest dazwischen
   - **EMOM** – jede Runde startet im gewählten Intervall (EMOM, E2MOM, E3MOM …)
-  - **Tabata** – Arbeit, Pause, Runden und Sätze; Standard ist klassisch 20/10 × 8
-- **7-Segment-Wanduhr** hochkant und quer, Rot für Arbeit, Grün für Pause, Bernstein für Runden
+  - **Tabata** – Work, Rest, Runden und Sätze; Standard ist klassisch 20/10 × 8
+- **7-Segment-Wanduhr** hochkant und quer, Rot für Work, Grün für Rest, Bernstein für Runden
 - **Uhr antippen**
   - AMRAP / For Time: Tippen zählt eine Runde, lange halten pausiert
   - EMOM / Tabata: Tippen pausiert
