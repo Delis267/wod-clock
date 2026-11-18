@@ -1,0 +1,112 @@
+/* Glue-Code: verbindet die Sätze aus tests/features/*.feature mit der App.
+   Jeder Schritt bekommt die „Welt“ eines Szenarios (w) und die Werte aus den Platzhaltern.
+   Platzhalter: {int} Zahl, {string} Text in "Anführungszeichen", {zeit} m:ss */
+import {step,eq,ok} from './lib/gherkin.js';
+
+/* ---------- Welt: eine frisch geladene App pro Szenario ---------- */
+const DEF={mode:'tabata',prep:10,sound:false,theme:'system',
+  cfg:{tabata:{work:20,rest:10,rounds:8,sets:1,setRest:60},amrap:{dur:720,sets:1,setRest:60},emom:{every:60,rounds:10},fortime:{cap:1200,rounds:0}}};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const sec=z=>{const [m,s]=z.split(':');return +m*60+ +s};
+
+export class World{
+  constructor(){this.s=clone(DEF);this.store={};this.frame=null}
+  /* Einstellungen gehen nur vor dem Laden der App (sie liegen in localStorage) */
+  set(fn){ok(!this.frame,'Einstellungen müssen vor dem Start der App stehen (als „Angenommen“ vor dem ersten „Wenn“)');fn(this.s)}
+  async app(){
+    if(this.frame)return;
+    localStorage.clear();localStorage.setItem('wodclock.s',JSON.stringify(this.s));
+    for(const [k,v] of Object.entries(this.store))localStorage.setItem('wodclock.'+k,JSON.stringify(v));
+    const f=document.createElement('iframe');f.className='app';
+    await new Promise(r=>{f.onload=r;f.src='/index.html?fakeclock';document.body.append(f)});
+    this.frame=f;this.win=f.contentWindow;this.doc=this.win.document;this.clock=this.win.__clock}
+  $(s){return this.doc.querySelector(s)}
+  $$(s){return [...this.doc.querySelectorAll(s)]}
+  visible(el){return el.getClientRects().length>0&&this.win.getComputedStyle(el).visibility!=='hidden'}
+  /* sichtbarer Text der Seite, so wie er im Quelltext steht (ohne CSS-Großschreibung) */
+  visibleText(){const out=[],tw=this.doc.createTreeWalker(this.doc.body,NodeFilter.SHOW_TEXT);
+    while(tw.nextNode()){const p=tw.currentNode.parentElement;if(p&&this.visible(p))out.push(tw.currentNode.textContent)}
+    return out.join(' ').replace(/\s+/g,' ')}
+  button(label){
+    const b=this.$$('button').filter(b=>this.visible(b)).find(b=>b.textContent.trim()===label||b.getAttribute('aria-label')===label);
+    ok(b,`Kein sichtbarer Knopf „${label}“`);return b}
+  tapClock(){const c=this.$('#clock'),P=this.win.PointerEvent;
+    c.dispatchEvent(new P('pointerdown',{bubbles:true}));c.dispatchEvent(new P('pointerup',{bubbles:true}));c.click()}
+  /* Knöpfe unter der Uhr, nur wenn sie sichtbar sind */
+  ctlButtons(){const c=this.$('#rCtl');if(c.classList.contains('hide')||c.classList.contains('off'))return [];
+    return [...c.querySelectorAll('button')].map(b=>b.textContent.trim())}
+  after(){if(this.win&&this.win.__errors.length)throw new Error('JavaScript-Fehler in der App: '+this.win.__errors.join(' | '))}
+  dispose(){if(this.frame)this.frame.remove()}
+}
+
+/* ---------- Einstellungen (vor dem Start) ---------- */
+step('der Countdown ist {int} Sekunden',(w,n)=>w.set(s=>{s.prep=n}));
+step('der Countdown ist aus',w=>w.set(s=>{s.prep=0}));
+step('Tabata ist eingestellt auf {int} Sekunden Work, {int} Sekunden Rest und {int} Runden',
+  (w,work,rest,rounds)=>w.set(s=>Object.assign(s.cfg.tabata,{work,rest,rounds})));
+step('AMRAP hat {int} Sätze mit {int} Sekunden Rest dazwischen',(w,sets,setRest)=>w.set(s=>Object.assign(s.cfg.amrap,{sets,setRest})));
+step('For Time hat kein Cap und kein Rundenziel',w=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds:0})));
+step('For Time hat {int} Runden als Ziel und kein Cap',(w,rounds)=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds})));
+step('der Verlauf enthält {int} Workouts',(w,n)=>{w.set(()=>{});w.store.hist=Array.from({length:n},(_,i)=>({mode:'emom',cfg:{every:60,rounds:5+i}}))});
+step('es gibt {int} Favoriten',(w,n)=>{w.set(()=>{});w.store.fav=Array.from({length:n},(_,i)=>({mode:'amrap',cfg:{dur:300+60*i,sets:1,setRest:60}}))});
+
+/* ---------- Aktionen ---------- */
+step('ich {string} starte',async(w,mode)=>{
+  await w.app();const b=w.$$('#modes button').find(b=>b.textContent===mode);ok(b,`Kein Modus „${mode}“`);
+  b.click();w.$('#start').click();w.startAt=w.clock.now()});
+step('ich den Modus {string} wähle',async(w,mode)=>{
+  await w.app();const b=w.$$('#modes button').find(b=>b.textContent===mode);ok(b,`Kein Modus „${mode}“`);b.click()});
+step('ich auf {string} tippe',async(w,label)=>{await w.app();w.button(label).click()});
+step('ich auf die Uhr tippe',w=>w.tapClock());
+step('ich {int}-mal auf die Uhr tippe',(w,n)=>{for(let i=0;i<n;i++)w.tapClock()});
+step('ich die Uhr lange drücke',w=>{const c=w.$('#clock'),P=w.win.PointerEvent;
+  c.dispatchEvent(new P('pointerdown',{bubbles:true}));w.clock.tick(600);c.dispatchEvent(new P('pointerup',{bubbles:true}));c.click()});
+step(['{int} Sekunden vergehen','{int} Sekunde vergeht'],(w,n)=>w.clock.tick(n*1000));
+/* Zeitpunkte zählen ab Beginn von Work, also nach dem Countdown */
+step(/^ich tippe Runden bei (.+)$/,(w,list)=>{
+  const workStart=w.startAt+w.s.prep*1000;
+  for(const z of list.split(/,\s*|\s+und\s+/)){const t=workStart+sec(z)*1000;
+    ok(t>=w.clock.now(),`${z} liegt in der Vergangenheit`);w.clock.tick(t-w.clock.now());w.tapClock()}});
+step('ich auf das × von Runde {int} tippe',(w,n)=>{const b=w.$(`#rInfo [data-del="${n-1}"]`);ok(b,`Kein × bei Runde ${n}`);b.click()});
+
+/* ---------- Prüfungen: Uhr ---------- */
+step(['ist die Uhr pausiert','die Uhr ist pausiert'],w=>ok(w.$('#run').classList.contains('paused'),'Die Uhr läuft, sollte aber pausiert sein'));
+step(['läuft die Uhr','die Uhr läuft'],w=>ok(!w.$('#run').classList.contains('paused'),'Die Uhr ist pausiert, sollte aber laufen'));
+step(['zeigt die Uhr {string}','die Uhr zeigt {string}'],(w,t)=>eq(w.$('#lT').textContent,t,'Phasenanzeige'));
+step(['zeigt die Uhr keine Phase','die Uhr zeigt keine Phase'],w=>eq(w.$('#lT').textContent,'','Phasenanzeige'));
+step(['zeigt die Uhr die Zeit {zeit}','die Uhr zeigt die Zeit {zeit}'],(w,z)=>eq(w.$('#ledT').getAttribute('aria-label'),z,'Zeit'));
+step(['zeigt der Rundenzähler {int}','der Rundenzähler zeigt {int}'],(w,n)=>eq(w.$('#ledR').getAttribute('aria-label'),String(n),'Rundenzähler'));
+step(['lautet der Titel {string}','der Titel lautet {string}'],(w,t)=>eq(w.$('#rTitle').textContent,t,'Titel'));
+step(['lautet der Hinweis {string}','der Hinweis lautet {string}'],(w,t)=>{const h=w.$('#rInfo .hint');eq(h&&h.textContent.trim(),t,'Hinweis')});
+step(['gibt es unter der Uhr keine Knöpfe','unter der Uhr sind keine Knöpfe'],w=>eq(w.ctlButtons().join(', '),'','Knöpfe unter der Uhr'));
+step(['ist unter der Uhr nur der Knopf {string} zu sehen','unter der Uhr ist nur der Knopf {string} zu sehen'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knöpfe unter der Uhr'));
+step(['steht auf dem Knopf {string}','auf dem Knopf steht {string}'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knopf unter der Uhr'));
+
+/* ---------- Prüfungen: Rundenliste ---------- */
+step(['ist Runde {int} zum Löschen markiert','Runde {int} ist zum Löschen markiert'],(w,n)=>{
+  const r=w.$('#rInfo .row.arm');ok(r,'Keine Runde ist markiert');
+  eq(r.children[0].textContent,String(n),'Markierte Runde');eq(r.children[1].textContent,'Löschen?','Text der markierten Zeile')});
+step(['ist keine Runde zum Löschen markiert','keine Runde ist zum Löschen markiert'],w=>ok(!w.$('#rInfo .row.arm'),'Eine Runde ist noch markiert'));
+step(['lautet die Rundenliste:','die Rundenliste lautet:'],(w,table)=>{
+  const exp=table.slice(1).map(r=>r.join(' | ')),act=w.$$('#rInfo .row').map(r=>[...r.children].slice(0,3).map(c=>c.textContent.trim()).join(' | '));
+  eq(act.join('\n'),exp.join('\n'),'Rundenliste')});
+
+/* ---------- Prüfungen: Ergebnis ---------- */
+step(['erscheint das Ergebnis {string}','das Ergebnis {string} erscheint'],(w,t)=>{
+  ok(w.$('#fin').classList.contains('show'),'Der Ergebnis-Screen ist nicht offen');eq(w.$('#fT').textContent,t,'Ergebnis-Titel')});
+step(['ist kein Ergebnis zu sehen','es ist kein Ergebnis zu sehen'],w=>ok(!w.$('#fin').classList.contains('show'),'Der Ergebnis-Screen ist offen'));
+step(['zeigt das Ergebnis {string} mit {string}','das Ergebnis zeigt {string} mit {string}'],(w,k,v)=>{
+  const row=w.$$('#fR > div').find(d=>d.querySelector('span')&&d.querySelector('span').textContent===k);ok(row,`Keine Ergebniszeile „${k}“`);
+  eq(row.textContent.slice(k.length).trim(),v,`Ergebnis „${k}“`)});
+
+/* ---------- Prüfungen: Texte und Listen ---------- */
+step(['sehe ich {string}','ich sehe {string}'],(w,t)=>ok(w.visibleText().includes(t),`„${t}“ ist nicht zu sehen`));
+step(['steht nirgends {string}','nirgends steht {string}'],(w,t)=>ok(!w.visibleText().includes(t),`„${t}“ ist zu sehen`));
+const LISTS={Verlauf:'#histList',Favoriten:'#favList'};
+step(['ist die Liste {string} vollständig sichtbar','die Liste {string} ist vollständig sichtbar'],(w,name)=>{
+  const e=w.$(LISTS[name]);ok(e,`Keine Liste „${name}“`);
+  ok(e.clientHeight>=e.scrollHeight,`${name}: nur ${e.clientHeight} px von ${e.scrollHeight} px sichtbar`)});
+step(['lässt sich die Seite scrollen','die Seite lässt sich scrollen'],w=>{
+  const e=w.$('.view:not(.hide) .scroll');ok(e.scrollHeight>e.clientHeight,`Kein Scrollen möglich (${e.scrollHeight} px Inhalt, ${e.clientHeight} px Platz)`)});
+step(['steht {string} ganz oben im Verlauf','{string} steht ganz oben im Verlauf'],(w,t)=>{
+  const e=w.$('#histList .it .tt');eq(e&&e.textContent,t,'Erster Verlaufseintrag')});

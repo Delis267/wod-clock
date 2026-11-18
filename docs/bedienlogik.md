@@ -2,6 +2,8 @@
 
 Diese Matrix zeigt, was jede Eingabe im laufenden Timer bewirkt, je nach Modus, Phase und Pausenzustand. Maßgeblich ist der Code in [js/run.js](../js/run.js), vor allem `tapClock()`, `togglePause()` und `draw()`. Den Ablauf der Phasen erzeugt `build()` in [js/workout.js](../js/workout.js).
 
+Die wichtigsten Regeln sind zusätzlich als ausführbare Specs in [tests/features/](../tests/features/) festgehalten (`node tests/run.js`), vor allem [pausieren.feature](../tests/features/pausieren.feature) und [runden-loeschen.feature](../tests/features/runden-loeschen.feature).
+
 ## Phasen je Modus
 
 | Modus | Ablauf |

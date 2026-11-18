@@ -54,6 +54,22 @@
 - Speicherung in `localStorage`, keine Server, kein Tracking
 - Schriften: Archivo und Barlow Condensed über Google Fonts (SIL Open Font License)
 
+## Specs (Tests)
+
+Das Verhalten ist als lesbare Spezifikation in `tests/features/*.feature` beschrieben, auf Deutsch im
+Gherkin-Stil (`Angenommen` / `Wenn` / `Dann`). Die Specs sind ausführbar:
+
+```
+node tests/run.js              # alle Specs
+node tests/run.js loeschen     # nur Dateien, deren Name „loeschen“ enthält
+node tests/run.js --alle       # jeden Schritt ausgeben
+```
+
+Keine Abhängigkeiten, nur Node (ab 16) und Chrome oder Edge (anderer Pfad: Umgebungsvariable `CHROME`).
+Die Uhr läuft im Test simuliert, „Wenn 90 Sekunden vergehen“ dauert also keine echte Zeit.
+Ein neuer Satz in einer `.feature`-Datei braucht eine passende Definition in `tests/steps.js` (Glue-Code);
+fehlt sie, sagt der Lauf das.
+
 ## Auf GitHub Pages veröffentlichen
 
 Das Repo bringt einen fertigen GitHub-Actions-Workflow mit (`.github/workflows/pages.yml`).
@@ -83,6 +99,11 @@ wod-clock/
 │   ├── saved.js           # Screen „Gespeichert“
 │   └── run.js             # laufender Timer und Ergebnis-Screen
 ├── docs/bedienlogik.md    # was welche Eingabe im Timer bewirkt
+├── tests/
+│   ├── features/          # Specs als .feature-Dateien (lesbar wie eine Spezifikation)
+│   ├── steps.js           # Glue-Code: verbindet jeden Satz mit der App
+│   ├── run.js             # startet Test-Server und Chrome, gibt das Ergebnis aus
+│   └── lib/               # Mini-Gherkin-Parser, simulierte Uhr, Runner-Seite
 ├── sw.js                  # Service Worker für Offline-Nutzung
 ├── manifest.webmanifest   # Name, Icons, Vollbild für den Home-Bildschirm
 ├── .nojekyll              # nur nötig, falls ohne Actions direkt aus dem Branch veröffentlicht wird

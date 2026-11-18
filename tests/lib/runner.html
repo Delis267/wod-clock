@@ -1,0 +1,19 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>wod-clock Specs</title>
+<!-- Läuft in Chrome (headless), gestartet von tests/run.js. Lädt alle .feature-Dateien, führt sie aus
+     und schickt das Ergebnis als JSON an den Test-Server zurück. -->
+<style>body{margin:0}iframe.app{width:390px;height:844px;border:0;display:block}</style>
+<script type="module">
+import {parse,runFeature} from './gherkin.js';
+import {World} from '../steps.js';
+const report=body=>fetch('/__result',{method:'POST',body:JSON.stringify(body)});
+try{
+  const files=await (await fetch('/__features'+location.search)).json();
+  const features=[];
+  for(const f of files){
+    const feat=parse(await (await fetch('/tests/features/'+f)).text(),'tests/features/'+f);
+    features.push(await runFeature(feat,()=>new World()))}
+  await report({features});
+}catch(e){await report({error:String(e&&e.stack||e)})}
+</script>
