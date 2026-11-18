@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   test:
-    name: Specs
+    name: test
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -25,7 +25,7 @@ jobs:
           node-version: 20
 
       # Chrome ist auf den GitHub-Runnern vorinstalliert (/usr/bin/google-chrome)
-      - name: Specs ausführen
+      - name: Akzeptanztests ausführen
         run: node tests/run.js --alle
 
   build:
