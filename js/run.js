@@ -14,6 +14,9 @@ const ICON={
   snd:'<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 9a4 4 0 0 1 0 6"/></svg>',
   mute:'<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 9.5l5 5M22 9.5l-5 5"/></svg>'};
 
+/* Zustand für Tests und Hilfstechnik: data-state="running|paused|done|closed" an #run (Design nutzt die Klassen) */
+const syncState=()=>{$('#run').dataset.state=!R.active?'closed':R.done?'done':R.paused?'paused':'running'};
+
 /* ---------- Ablauf ---------- */
 function start(){
   audioInit();wake();
@@ -29,7 +32,7 @@ function start(){
     if(Date.now()-(R.doneArm||0)>2500){R.doneArm=Date.now();b.textContent='Sicher? Nochmal tippen';setTimeout(()=>{if(b.isConnected)b.textContent='Fertig'},2500);return}
     advance(segEl())};
   $('#fin').classList.remove('show');$('#run').classList.remove('paused');sndIcon();
-  $('#run').classList.add('show');enter(0,false);loop()}
+  $('#run').classList.add('show');syncState();enter(0,false);loop()}
 const segEl=()=>((R.paused?R.pAt:performance.now())-R.t0)/1000;
 function enter(i,quiet){R.i=i;R.last=null;R.half=false;R.delArm=null;const s=R.seg[i];if(s.k==='work'&&R.m==='amrap'&&s.set>1)R.laps=[];
   $('#run').style.setProperty('--led',LED[s.k]);R.infoKey='';
@@ -58,6 +61,7 @@ function draw(s,el,rem){
   if(m==='tabata'||m==='emom'){rv=s.r||1;gv=c.rounds}else{rv=R.laps.length;gv=c.rounds||0}
   setLed($('#ledR'),String(rv).padStart(2,' '));if(gv)setLed($('#ledG'),String(gv).padStart(2,' '));
   $('#rCtl').classList.toggle('off',s.k!=='work');
+  const ctlOn=m==='fortime'&&s.k==='work';$('#rCtl').toggleAttribute('inert',!ctlOn);$('#rCtl').setAttribute('aria-hidden',String(!ctlOn));
   setPhase(s);
   let fr='';
   if(R.paused)fr='Pausiert';
@@ -73,10 +77,10 @@ function draw(s,el,rem){
       /* Rundenliste, auch in der Pause sichtbar, damit man Fehltipps in Ruhe löschen kann */
       const sp=R.laps.map((t,i)=>[i+1,t-(R.laps[i-1]||0),t]);
       const best=sp.length>1?Math.min(...sp.map(x=>x[1])):-1;
-      h=`<div class="hint"><i></i>${R.paused?'Lange halten setzt fort':'Tippen zählt eine Runde, lange halten pausiert'}</div>`+(sp.length?`<div class="splits"><div class="sh2"><span>Runde</span><span>Zeit</span><span>Gesamt</span><span></span></div><div class="list2">${sp.slice().reverse().map(([n,d,t])=>{const arm=R.delArm&&R.delArm.i===n-1;
-        return `<div class="row${d===best?' best':''}${arm?' arm':''}"><span>${n}</span><b>${arm?'Löschen?':fmt(d)}</b><span>${fmt(t)}</span><button class="del" data-del="${n-1}" aria-label="${arm?`Runde ${n} wirklich löschen`:`Runde ${n} löschen`}">${ICON.x}</button></div>`}).join('')}</div></div>`:'')}
-    else if(R.paused)h=`<div class="hint"><i></i>Antippen setzt fort</div>`;
-    else h=`<div class="hint"><i></i>Uhr antippen pausiert</div>`;
+      h=`<div class="hint" data-hint><i></i>${R.paused?'Lange halten setzt fort':'Tippen zählt eine Runde, lange halten pausiert'}</div>`+(sp.length?`<div class="splits"><div class="sh2"><span>Runde</span><span>Zeit</span><span>Gesamt</span><span></span></div><div class="list2">${sp.slice().reverse().map(([n,d,t])=>{const arm=R.delArm&&R.delArm.i===n-1;
+        return `<div class="row${d===best?' best':''}${arm?' arm':''}" data-lap="${n}"${arm?' data-armed':''}><span data-col="runde">${n}</span><b data-col="zeit">${arm?'Löschen?':fmt(d)}</b><span data-col="gesamt">${fmt(t)}</span><button class="del" data-del="${n-1}" aria-label="${arm?`Runde ${n} wirklich löschen`:`Runde ${n} löschen`}">${ICON.x}</button></div>`}).join('')}</div></div>`:'')}
+    else if(R.paused)h=`<div class="hint" data-hint><i></i>Antippen setzt fort</div>`;
+    else h=`<div class="hint" data-hint><i></i>Uhr antippen pausiert</div>`;
     /* Scrollposition der Rundenliste beim Neuzeichnen behalten */
     const old=$('#rInfo .list2'),top=old?old.scrollTop:0;
     $('#rInfo').innerHTML=h;
@@ -109,6 +113,7 @@ function tapClock(){
 function togglePause(){if(R.done)return;audioInit();
   if(!R.paused){R.paused=true;R.pAt=performance.now();$('#run').classList.add('paused')}
   else{R.t0+=performance.now()-R.pAt;R.paused=false;$('#run').classList.remove('paused')}
+  syncState();
   const s=R.seg[R.i],el=segEl();draw(s,el,s.dur-el)}
 (()=>{const el=$('#clock');let lp=null,fired=false;
   el.addEventListener('pointerdown',()=>{fired=false;if(!R.active||R.done||!lapMode(R.m))return;clearTimeout(lp);lp=setTimeout(()=>{fired=true;togglePause();vib(60)},550)});
@@ -118,27 +123,29 @@ function togglePause(){if(R.done)return;audioInit();
     if(lapMode(R.m)&&R.paused&&R.seg[R.i].k==='work')return;tapClock()}})();
 
 /* ---------- Ende ---------- */
+/* Ergebniszeile; data-result/data-value sind die stabilen Haken für Tests */
+const res=(k,v)=>`<div data-result="${k}" data-value="${v}"><span>${k}</span>${v}</div>`;
 function finish(completed){
   R.done=true;unwake();SND.end();vib([400,120,400]);
   if(completed){D.count++;saveCount()}
   $('#run').style.setProperty('--led',LED.done);$('#run').classList.remove('paused');
   const m=R.m,c=R.c;let title='Geschafft',sub=notation(m,c),led=ledTime(R.workTotal),rows='';
   if(m==='fortime'){const r=R.res[0]||{el:0,laps:0};
-    if(r.capped){title='Time Cap';led=ledTime(c.cap);rows=`<div><span>Runden geschafft</span>${r.laps}</div>`}
-    else{title='Time!';led=ledTime(r.el);rows=`<div><span>Deine Zeit</span>${fmt(r.el)}</div>`+(r.laps?`<div><span>Runden</span>${r.laps}</div>`:'')}}
+    if(r.capped){title='Time Cap';led=ledTime(c.cap);rows=res('Runden geschafft',r.laps)}
+    else{title='Time!';led=ledTime(r.el);rows=res('Deine Zeit',fmt(r.el))+(r.laps?res('Runden',r.laps):'')}}
   else if(m==='amrap'){const sum=R.res.reduce((a,r)=>a+r.laps,0);title='Time!';led=String(sum).padStart(2,' ');
-    rows=R.res.length>1?R.res.map((r,i)=>`<div><span>Satz ${i+1}</span>${r.laps} Runden</div>`).join('')+`<div><span>Gesamt</span>${sum} Runden</div>`:`<div><span>Runden in ${fmt(c.dur)}</span>${sum}</div>`}
-  else rows=`<div><span>Work gesamt</span>${fmt(R.workTotal)}</div><div><span>Workouts insgesamt</span>${D.count}</div>`;
+    rows=R.res.length>1?R.res.map((r,i)=>res(`Satz ${i+1}`,`${r.laps} Runden`)).join('')+res('Gesamt',`${sum} Runden`):res(`Runden in ${fmt(c.dur)}`,sum)}
+  else rows=res('Work gesamt',fmt(R.workTotal))+res('Workouts insgesamt',D.count);
   $('#fT').textContent=title;$('#fS').textContent=sub;setLed($('#ledF'),led);$('#fR').innerHTML=rows;
   $('#fUndo').classList.toggle('hide',!R.undo);
-  $('#fin').classList.add('show')}
+  $('#fin').classList.add('show');syncState()}
 function undoFinish(){
   if(!R.undo||!R.done)return;const u=R.undo;R.undo=null;
   D.count=Math.max(0,D.count-1);saveCount();
   R.res.pop();R.workTotal-=u.el;R.laps.pop();R.t0=u.t0;R.done=false;R.last=null;
   $('#fin').classList.remove('show');$('#run').style.setProperty('--led',LED.work);R.infoKey='';
-  audioInit();SND.lap();wake();loop()}
-function closeRun(){R.active=false;R.done=true;unwake();audioSleep();$('#run').classList.remove('show');renderSetup()}
+  syncState();audioInit();SND.lap();wake();loop()}
+function closeRun(){R.active=false;R.done=true;syncState();unwake();audioSleep();$('#run').classList.remove('show');renderSetup()}
 
 $('#rClose').onclick=()=>{
   if(!R.done&&Date.now()-R.arm>2500){R.arm=Date.now();const t=$('#rTitle');t.textContent='Nochmal tippen zum Beenden';setTimeout(()=>{if(R.active&&!R.done)t.textContent=notation(R.m,R.c)},2500);return}

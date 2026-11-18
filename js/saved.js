@@ -8,7 +8,7 @@ import {audioInit,SND} from './sound.js';
 const STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/></svg>';
 const isFav=(m,c)=>D.fav.some(f=>keyOf(f.mode,f.cfg)===keyOf(m,c));
 function item(list,i,e){const fav=isFav(e.mode,e.cfg);
-  return `<div class="it"><button class="go" data-load="${list}:${i}"><i class="md" style="background:${MC[e.mode]}"></i><span style="min-width:0"><div class="tt">${esc(notation(e.mode,e.cfg))}</div><div class="dd">${esc(detail(e.mode,e.cfg))}</div></span></button>
+  return `<div class="it"><button class="go" data-load="${list}:${i}"><i class="md" style="background:${MC[e.mode]}"></i><span style="min-width:0"><div class="tt" data-name>${esc(notation(e.mode,e.cfg))}</div><div class="dd">${esc(detail(e.mode,e.cfg))}</div></span></button>
   <button class="star" data-star="${list}:${i}" aria-pressed="${fav}" aria-label="${fav?'Aus Favoriten entfernen':'Als Favorit speichern'}">${STAR}</button></div>`}
 
 function renderSaved(){

@@ -32,9 +32,12 @@ export class World{
     ok(b,`Kein sichtbarer Knopf „${label}“`);return b}
   tapClock(){const c=this.$('#clock'),P=this.win.PointerEvent;
     c.dispatchEvent(new P('pointerdown',{bubbles:true}));c.dispatchEvent(new P('pointerup',{bubbles:true}));c.click()}
-  /* Knöpfe unter der Uhr, nur wenn sie sichtbar sind */
-  ctlButtons(){const c=this.$('#rCtl');if(c.classList.contains('hide')||c.classList.contains('off'))return [];
-    return [...c.querySelectorAll('button')].map(b=>b.textContent.trim())}
+  /* Knöpfe unter der Uhr, nur wenn sie bedienbar sind (aria-hidden) */
+  ctlButtons(){const c=this.$('#rCtl');if(c.getAttribute('aria-hidden')==='true')return [];
+    return [...c.querySelectorAll('button')].filter(b=>this.visible(b)).map(b=>b.textContent.trim())}
+  state(){return this.$('#run').dataset.state}
+  /* Zeilen der Rundenliste als "Runde | Zeit | Gesamt" */
+  laps(){return this.$$('#rInfo [data-lap]').map(r=>['runde','zeit','gesamt'].map(k=>r.querySelector('[data-col="'+k+'"]').textContent.trim()).join(' | '))}
   after(){if(this.win&&this.win.__errors.length)throw new Error('JavaScript-Fehler in der App: '+this.win.__errors.join(' | '))}
   dispose(){if(this.frame)this.frame.remove()}
 }
@@ -70,34 +73,33 @@ step(/^ich tippe Runden bei (.+)$/,(w,list)=>{
 step('ich auf das × von Runde {int} tippe',(w,n)=>{const b=w.$(`#rInfo [data-del="${n-1}"]`);ok(b,`Kein × bei Runde ${n}`);b.click()});
 
 /* ---------- Prüfungen: Uhr ---------- */
-step(['ist die Uhr pausiert','die Uhr ist pausiert'],w=>ok(w.$('#run').classList.contains('paused'),'Die Uhr läuft, sollte aber pausiert sein'));
-step(['läuft die Uhr','die Uhr läuft'],w=>ok(!w.$('#run').classList.contains('paused'),'Die Uhr ist pausiert, sollte aber laufen'));
+step(['ist die Uhr pausiert','die Uhr ist pausiert'],w=>eq(w.state(),'paused','Zustand der Uhr'));
+step(['läuft die Uhr','die Uhr läuft'],w=>eq(w.state(),'running','Zustand der Uhr'));
 step(['zeigt die Uhr {string}','die Uhr zeigt {string}'],(w,t)=>eq(w.$('#lT').textContent,t,'Phasenanzeige'));
 step(['zeigt die Uhr keine Phase','die Uhr zeigt keine Phase'],w=>eq(w.$('#lT').textContent,'','Phasenanzeige'));
 step(['zeigt die Uhr die Zeit {zeit}','die Uhr zeigt die Zeit {zeit}'],(w,z)=>eq(w.$('#ledT').getAttribute('aria-label'),z,'Zeit'));
 step(['zeigt der Rundenzähler {int}','der Rundenzähler zeigt {int}'],(w,n)=>eq(w.$('#ledR').getAttribute('aria-label'),String(n),'Rundenzähler'));
 step(['lautet der Titel {string}','der Titel lautet {string}'],(w,t)=>eq(w.$('#rTitle').textContent,t,'Titel'));
-step(['lautet der Hinweis {string}','der Hinweis lautet {string}'],(w,t)=>{const h=w.$('#rInfo .hint');eq(h&&h.textContent.trim(),t,'Hinweis')});
+step(['lautet der Hinweis {string}','der Hinweis lautet {string}'],(w,t)=>{const h=w.$('[data-hint]');eq(h&&h.textContent.trim(),t,'Hinweis')});
 step(['gibt es unter der Uhr keine Knöpfe','unter der Uhr sind keine Knöpfe'],w=>eq(w.ctlButtons().join(', '),'','Knöpfe unter der Uhr'));
 step(['ist unter der Uhr nur der Knopf {string} zu sehen','unter der Uhr ist nur der Knopf {string} zu sehen'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knöpfe unter der Uhr'));
 step(['steht auf dem Knopf {string}','auf dem Knopf steht {string}'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knopf unter der Uhr'));
 
 /* ---------- Prüfungen: Rundenliste ---------- */
 step(['ist Runde {int} zum Löschen markiert','Runde {int} ist zum Löschen markiert'],(w,n)=>{
-  const r=w.$('#rInfo .row.arm');ok(r,'Keine Runde ist markiert');
-  eq(r.children[0].textContent,String(n),'Markierte Runde');eq(r.children[1].textContent,'Löschen?','Text der markierten Zeile')});
-step(['ist keine Runde zum Löschen markiert','keine Runde ist zum Löschen markiert'],w=>ok(!w.$('#rInfo .row.arm'),'Eine Runde ist noch markiert'));
+  const r=w.$('#rInfo [data-armed]');ok(r,'Keine Runde ist markiert');
+  eq(r.dataset.lap,String(n),'Markierte Runde');eq(r.querySelector('[data-col="zeit"]').textContent,'Löschen?','Text der markierten Zeile')});
+step(['ist keine Runde zum Löschen markiert','keine Runde ist zum Löschen markiert'],w=>ok(!w.$('#rInfo [data-armed]'),'Eine Runde ist noch markiert'));
 step(['lautet die Rundenliste:','die Rundenliste lautet:'],(w,table)=>{
-  const exp=table.slice(1).map(r=>r.join(' | ')),act=w.$$('#rInfo .row').map(r=>[...r.children].slice(0,3).map(c=>c.textContent.trim()).join(' | '));
-  eq(act.join('\n'),exp.join('\n'),'Rundenliste')});
+  eq(w.laps().join('\n'),table.slice(1).map(r=>r.join(' | ')).join('\n'),'Rundenliste')});
 
 /* ---------- Prüfungen: Ergebnis ---------- */
 step(['erscheint das Ergebnis {string}','das Ergebnis {string} erscheint'],(w,t)=>{
-  ok(w.$('#fin').classList.contains('show'),'Der Ergebnis-Screen ist nicht offen');eq(w.$('#fT').textContent,t,'Ergebnis-Titel')});
-step(['ist kein Ergebnis zu sehen','es ist kein Ergebnis zu sehen'],w=>ok(!w.$('#fin').classList.contains('show'),'Der Ergebnis-Screen ist offen'));
+  eq(w.state(),'done','Zustand der Uhr');ok(w.visible(w.$('#fin')),'Der Ergebnis-Screen ist nicht zu sehen');eq(w.$('#fT').textContent,t,'Ergebnis-Titel')});
+step(['ist kein Ergebnis zu sehen','es ist kein Ergebnis zu sehen'],w=>ok(!w.visible(w.$('#fin')),'Der Ergebnis-Screen ist zu sehen'));
 step(['zeigt das Ergebnis {string} mit {string}','das Ergebnis zeigt {string} mit {string}'],(w,k,v)=>{
-  const row=w.$$('#fR > div').find(d=>d.querySelector('span')&&d.querySelector('span').textContent===k);ok(row,`Keine Ergebniszeile „${k}“`);
-  eq(row.textContent.slice(k.length).trim(),v,`Ergebnis „${k}“`)});
+  const row=w.$$('#fR [data-result]').find(d=>d.dataset.result===k);ok(row,`Keine Ergebniszeile „${k}“`);
+  eq(row.dataset.value,v,`Ergebnis „${k}“`)});
 
 /* ---------- Prüfungen: Texte und Listen ---------- */
 step(['sehe ich {string}','ich sehe {string}'],(w,t)=>ok(w.visibleText().includes(t),`„${t}“ ist nicht zu sehen`));
@@ -107,6 +109,6 @@ step(['ist die Liste {string} vollständig sichtbar','die Liste {string} ist vol
   const e=w.$(LISTS[name]);ok(e,`Keine Liste „${name}“`);
   ok(e.clientHeight>=e.scrollHeight,`${name}: nur ${e.clientHeight} px von ${e.scrollHeight} px sichtbar`)});
 step(['lässt sich die Seite scrollen','die Seite lässt sich scrollen'],w=>{
-  const e=w.$('.view:not(.hide) .scroll');ok(e.scrollHeight>e.clientHeight,`Kein Scrollen möglich (${e.scrollHeight} px Inhalt, ${e.clientHeight} px Platz)`)});
+  const e=w.$$('[data-scroll]').find(x=>w.visible(x));ok(e,'Kein sichtbarer Scrollbereich');ok(e.scrollHeight>e.clientHeight,`Kein Scrollen möglich (${e.scrollHeight} px Inhalt, ${e.clientHeight} px Platz)`)});
 step(['steht {string} ganz oben im Verlauf','{string} steht ganz oben im Verlauf'],(w,t)=>{
-  const e=w.$('#histList .it .tt');eq(e&&e.textContent,t,'Erster Verlaufseintrag')});
+  const e=w.$('#histList [data-name]');eq(e&&e.textContent,t,'Erster Verlaufseintrag')});
