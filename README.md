@@ -48,7 +48,8 @@
 
 ## Technik
 
-- Eine HTML-Datei mit Vanilla JavaScript, kein Framework
+- Vanilla JavaScript als ES-Module, kein Framework, kein Build-Schritt
+- Lokal testen über einen Webserver, z. B. `npx serve` (Module laden nicht über `file://`)
 - Töne werden live mit der Web Audio API erzeugt, keine Sounddateien
 - Speicherung in `localStorage`, keine Server, kein Tracking
 - Schriften: Archivo und Barlow Condensed über Google Fonts (SIL Open Font License)
@@ -68,7 +69,20 @@ Er veröffentlicht die Seite bei jedem Push auf `main` automatisch.
 wod-clock/
 ├── .github/workflows/
 │   └── pages.yml          # Build & Deploy auf GitHub Pages
-├── index.html             # die komplette App (HTML, CSS, JS)
+├── index.html             # HTML-Gerüst aller Screens
+├── css/app.css            # Styles
+├── js/
+│   ├── main.js            # Einstieg: lädt die Screens, Theme, Service Worker
+│   ├── util.js            # Helfer: DOM, Zeitformat, localStorage
+│   ├── led.js             # 7-Segment-Anzeige
+│   ├── state.js           # Einstellungen, Favoriten, Verlauf, Zähler
+│   ├── workout.js         # Fachlogik ohne DOM: Modi, Bezeichnungen, Ablauf
+│   ├── sound.js           # Töne, Vibration, Bildschirm wach halten
+│   ├── wheel.js           # Scrollrad-Dialog
+│   ├── setup.js           # Screen „Timer einstellen“
+│   ├── saved.js           # Screen „Gespeichert“
+│   └── run.js             # laufender Timer und Ergebnis-Screen
+├── docs/bedienlogik.md    # was welche Eingabe im Timer bewirkt
 ├── sw.js                  # Service Worker für Offline-Nutzung
 ├── manifest.webmanifest   # Name, Icons, Vollbild für den Home-Bildschirm
 ├── .nojekyll              # nur nötig, falls ohne Actions direkt aus dem Branch veröffentlicht wird
@@ -82,6 +96,9 @@ wod-clock/
 
 Datei ändern, committen, pushen – fertig. Der Workflow setzt bei jedem Deploy automatisch eine
 neue Cache-Version in `sw.js` (Commit-Hash), damit installierte Apps das Update beim nächsten Öffnen laden.
+
+**Neue Datei angelegt?** Dann an zwei Stellen eintragen, sonst fehlt sie online bzw. offline:
+in `sw.js` unter `ASSETS` und, falls sie in einem neuen Ordner liegt, im `cp`-Befehl von `.github/workflows/pages.yml`.
 
 <details>
 <summary>Alternative ohne Actions</summary>

@@ -1,6 +1,6 @@
 # Bedienlogik im Timer-Screen
 
-Diese Matrix zeigt, was jede Eingabe im laufenden Timer bewirkt, je nach Modus, Phase und Pausenzustand. Maßgeblich ist der Code in [index.html](../index.html), vor allem `tapClock()`, `togglePause()`, `undoLap()` und `draw()`.
+Diese Matrix zeigt, was jede Eingabe im laufenden Timer bewirkt, je nach Modus, Phase und Pausenzustand. Maßgeblich ist der Code in [js/run.js](../js/run.js), vor allem `tapClock()`, `togglePause()`, `undoLap()` und `draw()`. Den Ablauf der Phasen erzeugt `build()` in [js/workout.js](../js/workout.js).
 
 ## Phasen je Modus
 
@@ -39,12 +39,26 @@ Bei For Time mit Rundenziel beendet die Runde, die das Ziel erreicht, das Workou
 
 ### Knöpfe unter der Uhr
 
-Die Knöpfe gibt es nur in den Lap-Modi. Sie sind nur in der Arbeitsphase sichtbar und im Countdown sowie in Satzpausen ausgeblendet. Ihr Platz bleibt dabei frei, damit die Uhr nicht springt.
+Es gibt nur einen Knopf, und nur bei For Time. Er ist nur in der Arbeitsphase sichtbar und im Countdown ausgeblendet. Sein Platz bleibt dabei frei, damit die Uhr nicht springt. Tabata, EMOM und AMRAP haben keine Knöpfe unter der Uhr.
 
-| Knopf | Modus | Arbeit (läuft oder pausiert) | Countdown, Satzpause |
+| Knopf | Modus | Arbeit (läuft oder pausiert) | Countdown |
 |---|---|---|---|
-| **Zurück** | AMRAP, For Time | nimmt die letzte Runde zurück (ohne Wirkung, wenn keine gezählt ist) | ausgeblendet |
 | **Fertig** | nur For Time | 1. Tippen: „Sicher? Nochmal tippen“, 2. Tippen innerhalb von 2,5 s: Workout beenden | ausgeblendet |
+
+### Rundenliste: Fehltipp löschen (AMRAP, For Time)
+
+In der Arbeitsphase steht unter der Uhr die Liste der getippten Runden, im Lauf und in der Pause. Jede Zeile hat rechts ein ×.
+
+| Aktion | Wirkung |
+|---|---|
+| 1. Tippen aufs × | Zeile wird rot markiert, statt der Zeit steht „Löschen?“ |
+| 2. Tippen aufs × derselben Zeile innerhalb von 2,5 s | Runde wird gelöscht |
+| kein 2. Tippen | Markierung verfällt nach 2,5 s, nichts wird gelöscht |
+| Tippen aufs × einer anderen Zeile | markiert stattdessen diese Zeile |
+
+Gespeichert sind die Tipp-Zeitpunkte (`R.laps`), nicht die Rundenzeiten. Eine gelöschte Runde verschmilzt deshalb mit der folgenden. Beispiel: Tipps bei 2:00, 2:05 (Fehltipp) und 4:10 ergeben nach dem Löschen die Runden 2:00 und 2:10. Gesamtzeiten, Rundenzähler und die Markierung der besten Runde passen sich automatisch an.
+
+Einen eigenen „Zurück“-Knopf gibt es nicht mehr. Zusätzlich bietet der Ergebnis-Screen „Versehentlich? Letzte Runde zurück“ an, wenn For Time mit Rundenziel durch das Tippen der letzten Runde endet.
 
 ### Kopfzeile (immer verfügbar)
 
@@ -58,7 +72,7 @@ Die Knöpfe gibt es nur in den Lap-Modi. Sie sind nur in der Arbeitsphase sichtb
 | Zustand | Tabata / EMOM | AMRAP / For Time |
 |---|---|---|
 | Arbeit, läuft | „Uhr antippen pausiert“ | „Tippen zählt eine Runde, lange halten pausiert“ und Rundenliste |
-| Arbeit, pausiert | „Antippen setzt fort“ | „Lange halten setzt fort“ |
+| Arbeit, pausiert | „Antippen setzt fort“ | „Lange halten setzt fort“ und Rundenliste |
 | Countdown / Pause / Satzpause, läuft | „Uhr antippen pausiert“ | „Uhr antippen pausiert“ |
 | Countdown / Pause / Satzpause, pausiert | „Antippen setzt fort“ | „Antippen setzt fort“ |
 
