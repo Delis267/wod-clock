@@ -67,7 +67,9 @@ server.listen(0,'127.0.0.1',()=>{
   const timer=setTimeout(()=>{console.error(red('Zeitüberschreitung: keine Antwort vom Browser nach 60 s'));finish(false)},60000);
   function finish(passed){clearTimeout(timer);cleanup();server.close();process.exitCode=passed?0:1}
   onResult=r=>finish(print(r));
-  browser=spawn(chromePath,['--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check','--disable-extensions',
+  /* In der CI (GitHub setzt CI=true) blockieren neuere Ubuntu-Runner teils Chromes Sandbox */
+  const ci=process.env.CI?['--no-sandbox']:[];
+  browser=spawn(chromePath,['--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check','--disable-extensions',...ci,
     `--user-data-dir=${profile}`,'--window-size=800,1000',`http://127.0.0.1:${port}/tests/lib/runner.html?f=${encodeURIComponent(filter)}`],{stdio:'ignore'});
   browser.on('error',e=>{console.error(red('Chrome ließ sich nicht starten: '+e.message));finish(false)});
 });
