@@ -70,8 +70,8 @@ Die Uhr läuft im Test simuliert, „Wenn 90 Sekunden vergehen“ dauert also ke
 Ein neuer Satz in einer `.feature`-Datei braucht eine passende Definition in `tests/steps.js` (Glue-Code);
 fehlt sie, sagt der Lauf das.
 
-In der CI laufen die Specs bei jedem Push auf `main` und bei jedem Pull Request (Job „Specs“ im Workflow
-`.github/workflows/pages.yml`). Veröffentlicht wird nur, wenn alle Specs bestehen.
+In der CI laufen die Specs bei jedem Push auf `main` und bei jedem Pull Request (Job `test`, Schritt
+„Akzeptanztests ausführen“ im Workflow `.github/workflows/pages.yml`). Veröffentlicht wird nur, wenn alle Specs bestehen.
 
 ## Auf GitHub Pages veröffentlichen
 
