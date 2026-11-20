@@ -2,7 +2,8 @@
    Die Bedienlogik ist in tests/features/ als ausführbare Spec beschrieben. */
 import {$,fmt,ledTime,clone} from './util.js';
 import {setLed} from './led.js';
-import {S,D,save,saveHist,saveCount} from './state.js';
+import {S,D,save,saveHist,saveCount,saveResults} from './state.js';
+import {splitsHTML} from './splits.js';
 import {lapMode,keyOf,notation,build} from './workout.js';
 import {audioInit,audioResume,audioSleep,SND,vib,wake,unwake} from './sound.js';
 import {renderSetup} from './setup.js';
@@ -125,18 +126,11 @@ function togglePause(){if(R.done)return;audioInit();
 /* ---------- Ende ---------- */
 /* Ergebniszeile; data-result/data-value sind die stabilen Haken für Tests */
 const res=(k,v)=>`<div data-result="${k}" data-value="${v}"><span>${k}</span>${v}</div>`;
-/* Rundenzeiten im Ergebnis, chronologisch und je Satz gruppiert; die schnellste Runde eines Satzes ist hervorgehoben */
-function finSplits(sets){
-  if(!sets.some(r=>r.times.length))return '';
-  const multi=sets.length>1;
-  const groups=sets.map((r,si)=>{const sp=r.times.map((t,i)=>[i+1,t-(r.times[i-1]||0),t]);
-    const best=sp.length>1?Math.min(...sp.map(x=>x[1])):-1;
-    return `<div data-set="${si+1}">${multi?`<div class="sl">Satz ${si+1}</div>`:''}${sp.length?sp.map(([n,d,t])=>
-      `<div class="row${d===best?' best':''}" data-lap="${n}"><span data-col="runde">${n}</span><b data-col="zeit">${fmt(d)}</b><span data-col="gesamt">${fmt(t)}</span></div>`).join(''):'<div class="row none">keine Runde</div>'}</div>`}).join('');
-  return `<div class="sh2"><span>Runde</span><span>Zeit</span><span>Gesamt</span></div><div class="list2">${groups}</div>`}
 function finish(completed){
   R.done=true;unwake();SND.end();vib([400,120,400]);
-  if(completed){D.count++;saveCount()}
+  /* nur fertige Workouts landen in der Ergebnisliste; abgebrochene kommen hier gar nicht an */
+  if(completed){D.count++;saveCount();
+    D.results=[{mode:R.m,cfg:clone(R.c),at:Date.now(),res:clone(R.res),work:R.workTotal},...D.results].slice(0,10);saveResults();R.saved=true}
   $('#run').style.setProperty('--led',LED.done);$('#run').classList.remove('paused');
   const m=R.m,c=R.c;let title='Geschafft',sub=notation(m,c),led=ledTime(R.workTotal),rows='';
   if(m==='fortime'){const r=R.res[0]||{el:0,laps:0};
@@ -146,12 +140,13 @@ function finish(completed){
     rows=R.res.length>1?R.res.map((r,i)=>res(`Satz ${i+1}`,`${r.laps} Runden`)).join('')+res('Gesamt',`${sum} Runden`):res(`Runden in ${fmt(c.dur)}`,sum)}
   else rows=res('Work gesamt',fmt(R.workTotal))+res('Workouts insgesamt',D.count);
   $('#fT').textContent=title;$('#fS').textContent=sub;setLed($('#ledF'),led);$('#fR').innerHTML=rows;
-  $('#fSp').innerHTML=lapMode(m)?finSplits(R.res):'';
+  $('#fSp').innerHTML=lapMode(m)?splitsHTML(R.res):'';
   $('#fUndo').classList.toggle('hide',!R.undo);
   $('#fin').classList.add('show');syncState()}
 function undoFinish(){
   if(!R.undo||!R.done)return;const u=R.undo;R.undo=null;
   D.count=Math.max(0,D.count-1);saveCount();
+  if(R.saved){D.results.shift();saveResults();R.saved=false}
   R.res.pop();R.workTotal-=u.el;R.laps.pop();R.t0=u.t0;R.done=false;R.last=null;
   $('#fin').classList.remove('show');$('#run').style.setProperty('--led',LED.work);R.infoKey='';
   syncState();audioInit();SND.lap();wake();loop()}

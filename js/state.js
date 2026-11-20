@@ -13,9 +13,11 @@ if(!MODES[S.mode])S.mode='tabata';
 export const save=()=>store.set('s',S);
 
 /* in einem Objekt, damit andere Module die Listen neu zuweisen können */
-export const D={fav:store.get('fav',[]),hist:store.get('hist',[]),count:store.get('count',0)};
+export const D={fav:store.get('fav',[]),hist:store.get('hist',[]),count:store.get('count',0),results:store.get('results',[])};
 export const saveFav=()=>store.set('fav',D.fav);
 export const saveHist=()=>store.set('hist',D.hist);
 export const saveCount=()=>store.set('count',D.count);
+/* Ergebnisse der letzten 10 fertigen Workouts: {mode,cfg,at,res:[{el,laps,times,capped}],work} */
+export const saveResults=()=>store.set('results',D.results);
 
 export function applyTheme(){if(S.theme==='system')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=S.theme}

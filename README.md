@@ -34,8 +34,9 @@
   - AMRAP / For Time: Tippen zählt eine Runde, lange halten pausiert
   - EMOM / Tabata und jeder Countdown: Tippen pausiert
   - Zwischenzeiten pro Runde, schnellste Runde markiert, Fehltipps per × aus der Liste löschen
+  - nach dem Workout stehen die Rundenzeiten auch im Ergebnis
 - **Box-Buzzer**: 3-2-1-Piepen, Buzzer bei Start und Ende, Doppelpiep 10 s vor Schluss; läuft über deine Musik, ohne sie anzuhalten
-- **Gespeichert**: Workout-Zähler, Favoriten und die letzten 10 Timer in CrossFit-Kurzschreibweise
+- **Gespeichert**: Workout-Zähler, Ergebnisse der letzten 10 fertigen Workouts (mit aufklappbaren Rundenzeiten), Favoriten und die letzten 10 Timer in CrossFit-Kurzschreibweise
 - **Hell- und Dunkelmodus** (automatisch oder fest), läuft ohne Scrollen auf dem Handy
 - **Offline-fähig** nach dem ersten Aufruf, installierbar auf dem Home-Bildschirm
 

@@ -52,6 +52,8 @@ step('AMRAP hat {int} Sätze mit {int} Sekunden Rest dazwischen',(w,sets,setRest
 step('For Time hat kein Cap und kein Rundenziel',w=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds:0})));
 step('For Time hat {int} Runden als Ziel und kein Cap',(w,rounds)=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds})));
 step('der Verlauf enthält {int} Workouts',(w,n)=>{w.set(()=>{});w.store.hist=Array.from({length:n},(_,i)=>({mode:'emom',cfg:{every:60,rounds:5+i}}))});
+step('die Ergebnisliste enthält {int} Workouts',(w,n)=>{w.set(()=>{});
+  w.store.results=Array.from({length:n},(_,i)=>({mode:'emom',cfg:{every:60,rounds:5+i},at:Date.now()-(i+1)*864e5,res:[],work:300+60*i}))});
 step('es gibt {int} Favoriten',(w,n)=>{w.set(()=>{});w.store.fav=Array.from({length:n},(_,i)=>({mode:'amrap',cfg:{dur:300+60*i,sets:1,setRest:60}}))});
 
 /* ---------- Aktionen ---------- */
@@ -102,13 +104,27 @@ step(['zeigt das Ergebnis {string} mit {string}','das Ergebnis zeigt {string} mi
   const row=w.$$('#fR [data-result]').find(d=>d.dataset.result===k);ok(row,`Keine Ergebniszeile „${k}“`);
   eq(row.dataset.value,v,`Ergebnis „${k}“`)});
 
-/* Rundenliste im Ergebnis; die Spalten kommen aus der Kopfzeile der Tabelle, „Satz“ aus der umgebenden Gruppe */
-const finLaps=w=>w.$$('#fSp [data-lap]').filter(r=>w.visible(r));
-step(['lautet die Rundenliste im Ergebnis:','die Rundenliste im Ergebnis lautet:'],(w,table)=>{
+/* Rundenzeiten (Ergebnis-Screen und Ergebnisliste); die Spalten kommen aus der Kopfzeile der Tabelle, „Satz“ aus der umgebenden Gruppe */
+const lapRows=(w,sel)=>w.$$(sel+' [data-lap]').filter(r=>w.visible(r));
+function lapTable(w,sel,table,what){
   const cols=table[0].map(c=>c.toLowerCase());
-  const rows=finLaps(w).map(r=>cols.map(k=>k==='satz'?r.closest('[data-set]').dataset.set:r.querySelector('[data-col="'+k+'"]').textContent.trim()).join(' | '));
-  eq(rows.join('\n'),table.slice(1).map(r=>r.join(' | ')).join('\n'),'Rundenliste im Ergebnis')});
-step(['gibt es im Ergebnis keine Rundenliste','im Ergebnis gibt es keine Rundenliste'],w=>ok(!finLaps(w).length,'Im Ergebnis steht eine Rundenliste'));
+  const rows=lapRows(w,sel).map(r=>cols.map(k=>k==='satz'?r.closest('[data-set]').dataset.set:r.querySelector('[data-col="'+k+'"]').textContent.trim()).join(' | '));
+  eq(rows.join('\n'),table.slice(1).map(r=>r.join(' | ')).join('\n'),what)}
+step(['lautet die Rundenliste im Ergebnis:','die Rundenliste im Ergebnis lautet:'],(w,table)=>lapTable(w,'#fSp',table,'Rundenliste im Ergebnis'));
+step(['gibt es im Ergebnis keine Rundenliste','im Ergebnis gibt es keine Rundenliste'],w=>ok(!lapRows(w,'#fSp').length,'Im Ergebnis steht eine Rundenliste'));
+
+/* ---------- Prüfungen: Ergebnisliste unter „Gespeichert“ ---------- */
+const results=w=>w.$$('#resList [data-entry]');
+step(['hat die Ergebnisliste {int} Einträge','hat die Ergebnisliste {int} Eintrag','die Ergebnisliste hat {int} Einträge'],(w,n)=>eq(results(w).length,n,'Einträge in der Ergebnisliste'));
+step(['ist das oberste Ergebnis {string} mit {string}','das oberste Ergebnis ist {string} mit {string}'],(w,name,sum)=>{
+  const e=results(w)[0];ok(e,'Die Ergebnisliste ist leer');
+  eq(e.querySelector('[data-name]').textContent,name,'Name des obersten Ergebnisses');
+  eq(e.querySelector('[data-summary]').textContent,sum,'Ergebnis des obersten Eintrags')});
+step('ich das oberste Ergebnis aufklappe',w=>{const e=results(w)[0];ok(e,'Die Ergebnisliste ist leer');
+  const b=e.querySelector('[aria-expanded]');ok(b,'Das oberste Ergebnis lässt sich nicht aufklappen');b.click()});
+step(['lauten die Rundenzeiten des obersten Ergebnisses:','die Rundenzeiten des obersten Ergebnisses lauten:'],(w,table)=>
+  lapTable(w,'#resList [data-entry]:first-child',table,'Rundenzeiten des obersten Ergebnisses'));
+step(['sind keine Rundenzeiten aufgeklappt','es sind keine Rundenzeiten aufgeklappt'],w=>ok(!lapRows(w,'#resList').length,'In der Ergebnisliste sind Rundenzeiten aufgeklappt'));
 
 /* ---------- Prüfungen: Texte und Listen ---------- */
 step(['sehe ich {string}','ich sehe {string}'],(w,t)=>ok(w.visibleText().includes(t),`„${t}“ ist nicht zu sehen`));

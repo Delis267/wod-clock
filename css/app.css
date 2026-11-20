@@ -94,6 +94,23 @@ h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.01em}
 .star svg{width:20px;height:20px;stroke-width:1.6;stroke-linejoin:round;fill:none;stroke:var(--faint)}
 .star[aria-pressed=true] svg{fill:#ffb000;stroke:#ffb000}
 .empty{padding:16px;color:var(--sub);font-size:15px;line-height:1.4}
+/* Ergebnisliste; die Rundenzeiten nutzen die .splits-Tabelle aus dem Timer, hier mit den Farben der Seite */
+.rs+.rs{box-shadow:inset 0 1px 0 var(--sep)}
+.rs .go{width:100%;display:flex;align-items:center;gap:12px;padding:12px 10px 12px 14px;text-align:left}
+.rs .md{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.rs .rx{flex:1;min-width:0}
+.rs .tt{font-family:var(--cond);font-size:24px;font-weight:700;line-height:1.05}
+.rs .dd{font-size:13px;color:var(--sub)}
+.rs .rv{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rs .chev{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:var(--faint);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.rs.open .chev{transform:rotate(180deg)}
+.rsp{--r-faint:var(--faint);--r-line:var(--sep);--r-sub:var(--sub);--r-text:var(--text);--r-title:var(--sub);--r-best:#e08a00;margin:0 14px 12px 34px}
+.rsp .sh2,.rsp .row{grid-template-columns:1fr 1fr 1fr}
+.rsp .sh2{padding-top:0}
+.rsp .row{padding-top:7px;padding-bottom:7px;font-size:15px}
+.rsp .row b{font-size:17px}
+.rsp .sl{font-size:13px;font-weight:600;color:var(--sub);padding:10px 2px 0}
+.rsp .row.none{display:block;color:var(--faint)}
 .note{margin:0 2px;font-size:13px;color:var(--faint)}
 .sw{width:51px;height:31px;border-radius:4px;background:var(--key);position:relative;flex:0 0 auto}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:25px;height:25px;border-radius:2px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
