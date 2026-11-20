@@ -199,6 +199,15 @@ h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.01em}
 .fin .res div{display:flex;justify-content:space-between;padding:8px 2px;font-size:17px;font-variant-numeric:tabular-nums}
 .fin .res div+div{box-shadow:inset 0 1px 0 var(--r-line)}
 .fin .res span{color:var(--r-sub)}
+/* Bei vielen Runden scrollt nur die Liste, Titel und Knöpfe bleiben sichtbar */
+.fin .in{max-height:100%;min-height:0}
+.fin .in>*:not(.fsp){flex-shrink:0}
+.fin .fsp{flex:0 1 auto;margin-top:0;min-height:120px}
+.fin .in:has(.fsp:not(:empty)) #ledF{width:min(100%,24vh);margin:0 auto}
+.fin .fsp:empty{display:none}
+.fin .fsp .sh2,.fin .fsp .row{grid-template-columns:1fr 1fr 1fr}
+.fin .fsp .sl{font-size:13px;font-weight:600;color:var(--r-title);padding:12px 2px 2px}
+.fin .fsp .row.none{display:block;color:var(--r-faint);font-size:15px}
 .fin .btns{display:flex;gap:10px}
 .fin .btns button{flex:1;height:56px;font-size:18px;font-weight:600}
 .fin .btns .pri{background:var(--start);box-shadow:0 3px 0 var(--startEdge);color:#fff;border-radius:4px;font-family:var(--cond);font-size:24px;font-weight:700}

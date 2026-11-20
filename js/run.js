@@ -38,7 +38,7 @@ function enter(i,quiet){R.i=i;R.last=null;R.half=false;R.delArm=null;const s=R.s
   $('#run').style.setProperty('--led',LED[s.k]);R.infoKey='';
   if(quiet)return;
   if(s.k==='work'){SND.work();vib(250)}else if(s.k!=='prep'){SND.rest();vib([120,80,120])}}
-function leave(el){const s=R.seg[R.i];if(s.k==='work'){R.workTotal+=el;if(lapMode(R.m))R.res.push({el,laps:R.laps.length,capped:R.m==='fortime'&&el>=s.dur})}}
+function leave(el){const s=R.seg[R.i];if(s.k==='work'){R.workTotal+=el;if(lapMode(R.m))R.res.push({el,laps:R.laps.length,times:R.laps.slice(),capped:R.m==='fortime'&&el>=s.dur})}}
 function advance(el){leave(el);R.t0=performance.now();if(R.i+1>=R.seg.length)return finish(true);enter(R.i+1,false)}
 function loop(){
   if(!R.active||R.done)return;
@@ -125,6 +125,15 @@ function togglePause(){if(R.done)return;audioInit();
 /* ---------- Ende ---------- */
 /* Ergebniszeile; data-result/data-value sind die stabilen Haken für Tests */
 const res=(k,v)=>`<div data-result="${k}" data-value="${v}"><span>${k}</span>${v}</div>`;
+/* Rundenzeiten im Ergebnis, chronologisch und je Satz gruppiert; die schnellste Runde eines Satzes ist hervorgehoben */
+function finSplits(sets){
+  if(!sets.some(r=>r.times.length))return '';
+  const multi=sets.length>1;
+  const groups=sets.map((r,si)=>{const sp=r.times.map((t,i)=>[i+1,t-(r.times[i-1]||0),t]);
+    const best=sp.length>1?Math.min(...sp.map(x=>x[1])):-1;
+    return `<div data-set="${si+1}">${multi?`<div class="sl">Satz ${si+1}</div>`:''}${sp.length?sp.map(([n,d,t])=>
+      `<div class="row${d===best?' best':''}" data-lap="${n}"><span data-col="runde">${n}</span><b data-col="zeit">${fmt(d)}</b><span data-col="gesamt">${fmt(t)}</span></div>`).join(''):'<div class="row none">keine Runde</div>'}</div>`}).join('');
+  return `<div class="sh2"><span>Runde</span><span>Zeit</span><span>Gesamt</span></div><div class="list2">${groups}</div>`}
 function finish(completed){
   R.done=true;unwake();SND.end();vib([400,120,400]);
   if(completed){D.count++;saveCount()}
@@ -137,6 +146,7 @@ function finish(completed){
     rows=R.res.length>1?R.res.map((r,i)=>res(`Satz ${i+1}`,`${r.laps} Runden`)).join('')+res('Gesamt',`${sum} Runden`):res(`Runden in ${fmt(c.dur)}`,sum)}
   else rows=res('Work gesamt',fmt(R.workTotal))+res('Workouts insgesamt',D.count);
   $('#fT').textContent=title;$('#fS').textContent=sub;setLed($('#ledF'),led);$('#fR').innerHTML=rows;
+  $('#fSp').innerHTML=m==='amrap'?finSplits(R.res):'';
   $('#fUndo').classList.toggle('hide',!R.undo);
   $('#fin').classList.add('show');syncState()}
 function undoFinish(){

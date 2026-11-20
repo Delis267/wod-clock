@@ -47,6 +47,7 @@ step('der Countdown ist {int} Sekunden',(w,n)=>w.set(s=>{s.prep=n}));
 step('der Countdown ist aus',w=>w.set(s=>{s.prep=0}));
 step('Tabata ist eingestellt auf {int} Sekunden Work, {int} Sekunden Rest und {int} Runden',
   (w,work,rest,rounds)=>w.set(s=>Object.assign(s.cfg.tabata,{work,rest,rounds})));
+step(['AMRAP dauert {int} Minuten','AMRAP dauert {int} Minute'],(w,n)=>w.set(s=>{s.cfg.amrap.dur=n*60}));
 step('AMRAP hat {int} Sätze mit {int} Sekunden Rest dazwischen',(w,sets,setRest)=>w.set(s=>Object.assign(s.cfg.amrap,{sets,setRest})));
 step('For Time hat kein Cap und kein Rundenziel',w=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds:0})));
 step('For Time hat {int} Runden als Ziel und kein Cap',(w,rounds)=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds})));
@@ -100,6 +101,14 @@ step(['ist kein Ergebnis zu sehen','es ist kein Ergebnis zu sehen'],w=>ok(!w.vis
 step(['zeigt das Ergebnis {string} mit {string}','das Ergebnis zeigt {string} mit {string}'],(w,k,v)=>{
   const row=w.$$('#fR [data-result]').find(d=>d.dataset.result===k);ok(row,`Keine Ergebniszeile „${k}“`);
   eq(row.dataset.value,v,`Ergebnis „${k}“`)});
+
+/* Rundenliste im Ergebnis; die Spalten kommen aus der Kopfzeile der Tabelle, „Satz“ aus der umgebenden Gruppe */
+const finLaps=w=>w.$$('#fSp [data-lap]').filter(r=>w.visible(r));
+step(['lautet die Rundenliste im Ergebnis:','die Rundenliste im Ergebnis lautet:'],(w,table)=>{
+  const cols=table[0].map(c=>c.toLowerCase());
+  const rows=finLaps(w).map(r=>cols.map(k=>k==='satz'?r.closest('[data-set]').dataset.set:r.querySelector('[data-col="'+k+'"]').textContent.trim()).join(' | '));
+  eq(rows.join('\n'),table.slice(1).map(r=>r.join(' | ')).join('\n'),'Rundenliste im Ergebnis')});
+step(['gibt es im Ergebnis keine Rundenliste','im Ergebnis gibt es keine Rundenliste'],w=>ok(!finLaps(w).length,'Im Ergebnis steht eine Rundenliste'));
 
 /* ---------- Prüfungen: Texte und Listen ---------- */
 step(['sehe ich {string}','ich sehe {string}'],(w,t)=>ok(w.visibleText().includes(t),`„${t}“ ist nicht zu sehen`));
