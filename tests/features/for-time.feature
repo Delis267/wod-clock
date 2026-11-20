@@ -51,3 +51,33 @@ Funktionalität: For Time beenden
     Dann erscheint das Ergebnis "Time!"
     Und das Ergebnis zeigt "Deine Zeit" mit "3:30"
     Und das Ergebnis zeigt "Runden" mit "3"
+    Und die Rundenliste im Ergebnis lautet:
+      | Runde | Zeit | Gesamt |
+      | 1     | 1:00 | 1:00   |
+      | 2     | 1:10 | 2:10   |
+      | 3     | 1:20 | 3:30   |
+
+  Szenario: Nach „Fertig“ stehen die getippten Runden im Ergebnis
+    Angenommen der Countdown ist aus
+    Und For Time hat kein Cap und kein Rundenziel
+    Wenn ich "For Time" starte
+    Und ich tippe Runden bei 0:40 und 1:30
+    Und 30 Sekunden vergehen
+    Und ich auf "Fertig" tippe
+    Und ich auf "Sicher? Nochmal tippen" tippe
+    Dann erscheint das Ergebnis "Time!"
+    Und das Ergebnis zeigt "Deine Zeit" mit "2:00"
+    Und die Rundenliste im Ergebnis lautet:
+      | Runde | Zeit | Gesamt |
+      | 1     | 0:40 | 0:40   |
+      | 2     | 0:50 | 1:30   |
+
+  Szenario: Ohne getippte Runde gibt es keine Rundenliste
+    Angenommen der Countdown ist aus
+    Und For Time hat kein Cap und kein Rundenziel
+    Wenn ich "For Time" starte
+    Und 60 Sekunden vergehen
+    Und ich auf "Fertig" tippe
+    Und ich auf "Sicher? Nochmal tippen" tippe
+    Dann erscheint das Ergebnis "Time!"
+    Und im Ergebnis gibt es keine Rundenliste

@@ -146,7 +146,7 @@ function finish(completed){
     rows=R.res.length>1?R.res.map((r,i)=>res(`Satz ${i+1}`,`${r.laps} Runden`)).join('')+res('Gesamt',`${sum} Runden`):res(`Runden in ${fmt(c.dur)}`,sum)}
   else rows=res('Work gesamt',fmt(R.workTotal))+res('Workouts insgesamt',D.count);
   $('#fT').textContent=title;$('#fS').textContent=sub;setLed($('#ledF'),led);$('#fR').innerHTML=rows;
-  $('#fSp').innerHTML=m==='amrap'?finSplits(R.res):'';
+  $('#fSp').innerHTML=lapMode(m)?finSplits(R.res):'';
   $('#fUndo').classList.toggle('hide',!R.undo);
   $('#fin').classList.add('show');syncState()}
 function undoFinish(){
