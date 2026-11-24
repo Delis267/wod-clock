@@ -77,6 +77,9 @@
   - AMRAP / For Time: Tippen zählt eine Runde, lange halten pausiert
   - EMOM / Tabata und jeder Countdown: Tippen pausiert
 - **Fehltipp?** Runde per × aus der Liste löschen, sie verschmilzt mit der nächsten
+- **Ablauf-Leiste** unten in der Uhr: zeigt das ganze Workout wie beim Einstellen, Erledigtes gedimmt,
+  ein Strich markiert, wo du stehst, getippte Runden erscheinen als Striche. Bei For Time mit Time Cap und
+  Rundenziel ist der Cap gleichmäßig auf die Runden verteilt, so siehst du, ob du im Plan liegst
 - **Box-Buzzer**: 3-2-1-Piepen, Buzzer bei Start und Ende, Doppelpiep 10 s vor Schluss
 - **Querformat**: Handy quer legen, die Uhr füllt den Bildschirm wie eine Wanduhr
 
