@@ -19,6 +19,11 @@
   <img src="screenshots/for-time.png" width="240" alt="For Time mit Rundenzähler">
 </p>
 <p align="center">
+  <img src="screenshots/ergebnis.png" width="240" alt="AMRAP-Ergebnis mit Rundenzeiten">
+  &nbsp;
+  <img src="screenshots/ergebnisse.png" width="240" alt="Ergebnisliste der letzten Workouts">
+</p>
+<p align="center">
   <img src="screenshots/amrap-quer.png" width="500" alt="AMRAP im Querformat">
 </p>
 
