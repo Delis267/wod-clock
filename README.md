@@ -80,7 +80,8 @@
 - **Ablauf-Leiste** unten in der Uhr: zeigt das ganze Workout wie beim Einstellen, Erledigtes gedimmt,
   ein Strich markiert, wo du stehst, getippte Runden erscheinen als Striche. Bei For Time mit Time Cap und
   Rundenziel ist der Cap gleichmäßig auf die Runden verteilt, so siehst du, ob du im Plan liegst
-- **Box-Buzzer**: 3-2-1-Piepen, Buzzer bei Start und Ende, Doppelpiep 10 s vor Schluss
+- **Box-Buzzer**, bewusst sparsam: 3-2-1 im Countdown vor dem Start, ein Ton bei jedem Wechsel zwischen Work und Rest,
+  Buzzer am Ende, ein kurzer Klick beim Tippen einer Runde
 - **Querformat**: Handy quer legen, die Uhr füllt den Bildschirm wie eine Wanduhr
 
 ## Nach dem Workout

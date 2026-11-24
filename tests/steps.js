@@ -44,6 +44,7 @@ export class World{
 
 /* ---------- Einstellungen (vor dem Start) ---------- */
 step('der Countdown ist {int} Sekunden',(w,n)=>w.set(s=>{s.prep=n}));
+step('die Töne sind an',w=>w.set(s=>{s.sound=true}));
 step('der Countdown ist aus',w=>w.set(s=>{s.prep=0}));
 step('Tabata ist eingestellt auf {int} Sekunden Work, {int} Sekunden Rest und {int} Runden',
   (w,work,rest,rounds)=>w.set(s=>Object.assign(s.cfg.tabata,{work,rest,rounds})));
@@ -98,6 +99,14 @@ step(['lautet der Hinweis {string}','der Hinweis lautet {string}'],(w,t)=>{const
 step(['gibt es unter der Uhr keine Knöpfe','unter der Uhr sind keine Knöpfe'],w=>eq(w.ctlButtons().join(', '),'','Knöpfe unter der Uhr'));
 step(['ist unter der Uhr nur der Knopf {string} zu sehen','unter der Uhr ist nur der Knopf {string} zu sehen'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knöpfe unter der Uhr'));
 step(['steht auf dem Knopf {string}','auf dem Knopf steht {string}'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knopf unter der Uhr'));
+
+/* ---------- Prüfungen: Töne ---------- */
+/* Die App meldet jeden gespielten Ton an window.__snd (nur im Test vorhanden, siehe tests/lib/clock.js).
+   Gehört wird im Test nichts; geprüft wird, welcher Ton in welcher Reihenfolge ausgelöst wurde. */
+const SOUND={count:null,work:'Work',rest:'Rest',lap:'Runde',end:'Ende'};
+step(['waren diese Töne zu hören: {string}','diese Töne waren zu hören: {string}'],(w,list)=>{
+  let n=0;const heard=w.win.__snd.map(([name,t])=>{if(name!=='count')return SOUND[name]||name;return String(3-(n++%3))});
+  eq(heard.join(', '),list,'Töne')});
 
 /* ---------- Prüfungen: Ablauf-Leiste in der Uhr ---------- */
 /* data-*-Haken: #rProg trägt data-elapsed/data-total (Sekunden) bzw. data-done (Runden), die Abschnitte data-block */

@@ -4,6 +4,8 @@
 (()=>{
   const realNow=Date.now(),timers=new Map();let now=0,nextId=1,frames=[];
   window.__errors=[];
+  /* gespielte Töne [Name, Zeit in ms]; js/sound.js meldet sie hierher, wenn es das Array gibt */
+  window.__snd=[];
   addEventListener('error',e=>__errors.push(e.message));
   addEventListener('unhandledrejection',e=>__errors.push(String(e.reason)));
   performance.now=()=>now;
