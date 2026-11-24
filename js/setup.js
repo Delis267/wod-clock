@@ -52,10 +52,14 @@ export function renderSetup(){
     h=bigCard('fortime.cap','Time Cap',c.cap?fmt(c.cap):'ohne',c.cap?'Uhr läuft hoch und stoppt spätestens hier':'Uhr läuft hoch, bis du Fertig tippst')+
       chips('fortime.cap',[[0,'Ohne'],[600,'10'],[900,'15'],[1200,'20'],[1800,'30']],c.cap)+
       `<div class="card">${stepper('fortime.rounds','Runden',c.rounds,'Optional. Stoppt nach der letzten Runde',c.rounds||'offen')}</div>`+rftViz(c)}
+  /* Countdown vor dem Start: gilt für alle Modi, deshalb hier statt im Menü */
+  h+=`<div class="rowx cd"><span>Countdown</span><span class="mini" role="group" aria-label="Countdown vor dem Start">${PREP.map(v=>`<button data-prep="${v}" aria-pressed="${S.prep===v}">${v} s</button>`).join('')}</span></div>`;
   $('#body').innerHTML=h;
   $('#vSetup').style.setProperty('--mode',MC[m]);const fc=$('#body').querySelector('.card');if(fc)fc.classList.add('acc');
   $('#start').setAttribute('aria-label',`Start: ${notation(m,c)}`);
 }
+
+const PREP=[3,5,10,30];
 
 $('#modes').onclick=e=>{const b=e.target.closest('[data-mode]');if(!b)return;S.mode=b.dataset.mode;save();renderSetup()};
 $('#body').onclick=e=>{
@@ -64,4 +68,5 @@ $('#body').onclick=e=>{
   if(d.step){const[m,f]=d.step.split('.');const c=S.cfg[m];const min=(m==='fortime'&&f==='rounds')?0:1,max=f==='sets'?10:99;
     c[f]=Math.max(min,Math.min(max,c[f]+(+d.d)));save();renderSetup()}
   if(d.quick){const[m,f]=d.quick.split('.');S.cfg[m][f]=+d.v;save();renderSetup()}
+  if(d.prep){S.prep=+d.prep;save();renderSetup()}
 };

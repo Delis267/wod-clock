@@ -119,6 +119,9 @@ h1{margin:0;font-size:30px;font-weight:700;letter-spacing:-.01em}
 .mini{display:grid;grid-template-columns:repeat(3,auto);gap:3px;background:var(--key);border-radius:4px;padding:3px}
 .mini button{padding:7px 10px;border-radius:2px;font-size:14px;font-weight:600;color:var(--sub)}
 .mini button[aria-pressed=true]{background:var(--panel);color:var(--text)}
+/* Countdown-Wahl auf dem Einstellungs-Screen: ohne Karte, 4 Werte */
+.rowx.cd{padding:0 2px;min-height:44px}
+.cd .mini{grid-template-columns:repeat(4,auto)}
 
 /* sheet */
 #sheet{position:fixed;inset:0;z-index:30;display:none}

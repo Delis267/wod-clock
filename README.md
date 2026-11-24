@@ -26,7 +26,7 @@
 
 ## Auf einen Blick
 
-- **Vier Modi**: For Time, AMRAP, EMOM und Tabata, in wenigen Sekunden eingestellt
+- **Vier Modi**: For Time, AMRAP, EMOM und Tabata, in wenigen Sekunden eingestellt, Countdown (3, 5, 10 oder 30 s) direkt über dem Start-Knopf
 - **Große 7-Segment-Uhr**, hochkant und quer: Rot für Work, Grün für Rest, Bernstein für Runden
 - **Runden per Tippen** auf die Uhr zählen, mit Zwischenzeit pro Runde
 - **Ergebnis nach dem Workout** mit allen Rundenzeiten, die letzten 10 bleiben gespeichert
