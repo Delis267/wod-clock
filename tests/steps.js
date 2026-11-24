@@ -66,6 +66,10 @@ step('ich {string} starte',async(w,mode)=>{
 step('ich den Modus {string} wähle',async(w,mode)=>{
   await w.app();const b=w.$$('#modes button').find(b=>b.textContent===mode);ok(b,`Kein Modus „${mode}“`);b.click()});
 step('ich auf {string} tippe',async(w,label)=>{await w.app();w.button(label).click()});
+step('ich den Countdown auf {int} Sekunden stelle',async(w,n)=>{
+  await w.app();const b=w.$(`#vSetup [data-prep="${n}"]`);ok(b&&w.visible(b),`Keine Countdown-Wahl „${n} s“`);b.click()});
+step(['ist beim Countdown {int} Sekunden gewählt','beim Countdown sind {int} Sekunden gewählt'],(w,n)=>{
+  const on=w.$$('#vSetup [data-prep][aria-pressed="true"]').map(b=>b.dataset.prep);eq(on.join(','),String(n),'Gewählter Countdown')});
 step('ich auf die Uhr tippe',w=>w.tapClock());
 step('ich {int}-mal auf die Uhr tippe',(w,n)=>{for(let i=0;i<n;i++)w.tapClock()});
 step('ich die Uhr lange drücke',w=>{const c=w.$('#clock'),P=w.win.PointerEvent;
