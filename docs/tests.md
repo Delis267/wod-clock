@@ -12,7 +12,8 @@ prüfen, was sichtbar ist. Interne Funktionen werden nicht einzeln getestet.
   CSS-Klassen. Das Design lässt sich ändern, ohne Tests anzupassen.
 - In der CI laufen sie vor jedem Deploy und bei Pull Requests. Veröffentlicht wird nur, wenn alle bestehen.
 
-Nicht abgedeckt: Ton, Vibration, echtes Zeitverhalten im Hintergrund und das iPhone selbst.
+Bei Tönen prüfen die Specs, welcher Ton wann ausgelöst wird (`window.__snd`, nur im Test vorhanden), nicht den Klang.
+Nicht abgedeckt: der Klang selbst, Vibration, echtes Zeitverhalten im Hintergrund und das iPhone selbst.
 
 ## So funktioniert es
 

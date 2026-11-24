@@ -24,7 +24,7 @@ function start(){
   audioInit();wake();
   const m=S.mode,c=clone(S.cfg[m]);
   const k=keyOf(m,c);D.hist=[{mode:m,cfg:c},...D.hist.filter(h=>keyOf(h.mode,h.cfg)!==k)].slice(0,10);saveHist();
-  R={active:true,m,c,seg:build(m,c,S.prep),i:0,t0:performance.now(),paused:false,pAt:0,laps:[],res:[],done:false,last:null,half:false,arm:0,workTotal:0,undo:null,doneArm:0};
+  R={active:true,m,c,seg:build(m,c,S.prep),i:0,t0:performance.now(),paused:false,pAt:0,laps:[],res:[],done:false,last:null,arm:0,workTotal:0,undo:null,doneArm:0};
   /* Ablauf-Leiste: Startpunkt jedes Abschnitts in Sekunden ab Beginn des Workouts (Countdown zählt nicht) */
   let a=0;R.off=R.seg.map(x=>{const o=a;if(x.k!=='prep'&&isFinite(x.dur))a+=x.dur;return o});
   R.prog=progModel(m,c,R.seg);R.progKey='';
@@ -40,7 +40,7 @@ function start(){
   $('#fin').classList.remove('show');$('#run').classList.remove('paused');sndIcon();
   $('#run').classList.add('show');syncState();enter(0,false);loop()}
 const segEl=()=>((R.paused?R.pAt:performance.now())-R.t0)/1000;
-function enter(i,quiet){R.i=i;R.last=null;R.half=false;R.delArm=null;const s=R.seg[i];if(s.k==='work'&&R.m==='amrap'&&s.set>1)R.laps=[];
+function enter(i,quiet){R.i=i;R.last=null;R.delArm=null;const s=R.seg[i];if(s.k==='work'&&R.m==='amrap'&&s.set>1)R.laps=[];
   $('#run').style.setProperty('--led',LED[s.k]);R.infoKey='';
   if(quiet)return;
   if(s.k==='work'){SND.work();vib(250)}else if(s.k!=='prep'){SND.rest();vib([120,80,120])}}
@@ -51,11 +51,8 @@ function loop(){
   if(!R.paused){let s=R.seg[R.i],el=segEl();
     while(el>=s.dur){leave(s.dur);R.t0+=s.dur*1000;if(R.i+1>=R.seg.length)return finish(true);enter(R.i+1,el-s.dur>1);s=R.seg[R.i];el=segEl()}
     const rem=s.dur-el,sec=Math.ceil(rem);
-    if(isFinite(rem)&&sec!==R.last){
-      if(sec>=1&&sec<=3)SND.count();
-      if(sec===10&&s.dur>=30&&s.k!=='prep')SND.ten();
-      R.last=sec}
-    if(!R.half&&s.k==='work'&&lapMode(R.m)&&isFinite(s.dur)&&s.dur>=240&&el>=s.dur/2){R.half=true;SND.half()}
+    /* 3-2-1 nur im Countdown vor dem Start; im Workout gibt es nur den Ton beim Wechsel (enter) */
+    if(s.k==='prep'&&sec!==R.last){if(sec>=1&&sec<=3)SND.count();R.last=sec}
     draw(s,el,rem)}
   requestAnimationFrame(loop)}
 

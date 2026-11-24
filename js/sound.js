@@ -18,15 +18,16 @@ function tone(f,dur,o={}){
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.006);g.gain.setValueAtTime(vol,Math.max(t+.007,t+dur-.03));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
     g.connect(lp);lp.connect(master);
     (det?[f,f*1.007]:[f]).forEach(fr=>{const os=ac.createOscillator();os.type=type;os.frequency.value=fr;os.connect(g);os.start(t);os.stop(t+dur+.03)})}catch(e){}}
-export const SND={
+/* jeder Ton meldet sich im Test an window.__snd (tests/lib/clock.js), damit die Specs prüfen können, was erklingt */
+const play=(name,fn)=>()=>{if(!S.sound)return;if(window.__snd)window.__snd.push([name,performance.now()]);fn()};
+const SOUNDS={
   count:()=>tone(1000,.14,{vol:.45}),
   work:()=>tone(1250,.7,{type:'sawtooth',vol:.42}),
   rest:()=>tone(520,.5,{vol:.42}),
-  ten:()=>{tone(1000,.09,{vol:.4});tone(1000,.09,{vol:.4,when:.17})},
-  half:()=>tone(880,.13,{vol:.35}),
   lap:()=>tone(2100,.04,{vol:.32,det:false}),
   end:()=>tone(760,.9,{type:'sawtooth',vol:.45}),
 };
+export const SND=Object.fromEntries(Object.entries(SOUNDS).map(([n,f])=>[n,play(n,f)]));
 
 export const vib=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 
