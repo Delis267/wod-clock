@@ -2,7 +2,8 @@
    Die Bedienlogik ist in tests/features/ als ausführbare Spec beschrieben. */
 import {$,fmt,ledTime,clone} from './util.js';
 import {setLed} from './led.js';
-import {S,D,save,saveHist,saveCount} from './state.js';
+import {S,D,save,saveHist,saveCount,saveResults} from './state.js';
+import {splitsHTML} from './splits.js';
 import {lapMode,keyOf,notation,build} from './workout.js';
 import {audioInit,audioResume,audioSleep,SND,vib,wake,unwake} from './sound.js';
 import {renderSetup} from './setup.js';
@@ -38,7 +39,7 @@ function enter(i,quiet){R.i=i;R.last=null;R.half=false;R.delArm=null;const s=R.s
   $('#run').style.setProperty('--led',LED[s.k]);R.infoKey='';
   if(quiet)return;
   if(s.k==='work'){SND.work();vib(250)}else if(s.k!=='prep'){SND.rest();vib([120,80,120])}}
-function leave(el){const s=R.seg[R.i];if(s.k==='work'){R.workTotal+=el;if(lapMode(R.m))R.res.push({el,laps:R.laps.length,capped:R.m==='fortime'&&el>=s.dur})}}
+function leave(el){const s=R.seg[R.i];if(s.k==='work'){R.workTotal+=el;if(lapMode(R.m))R.res.push({el,laps:R.laps.length,times:R.laps.slice(),capped:R.m==='fortime'&&el>=s.dur})}}
 function advance(el){leave(el);R.t0=performance.now();if(R.i+1>=R.seg.length)return finish(true);enter(R.i+1,false)}
 function loop(){
   if(!R.active||R.done)return;
@@ -127,7 +128,9 @@ function togglePause(){if(R.done)return;audioInit();
 const res=(k,v)=>`<div data-result="${k}" data-value="${v}"><span>${k}</span>${v}</div>`;
 function finish(completed){
   R.done=true;unwake();SND.end();vib([400,120,400]);
-  if(completed){D.count++;saveCount()}
+  /* nur fertige Workouts landen in der Ergebnisliste; abgebrochene kommen hier gar nicht an */
+  if(completed){D.count++;saveCount();
+    D.results=[{mode:R.m,cfg:clone(R.c),at:Date.now(),res:clone(R.res),work:R.workTotal},...D.results].slice(0,10);saveResults();R.saved=true}
   $('#run').style.setProperty('--led',LED.done);$('#run').classList.remove('paused');
   const m=R.m,c=R.c;let title='Geschafft',sub=notation(m,c),led=ledTime(R.workTotal),rows='';
   if(m==='fortime'){const r=R.res[0]||{el:0,laps:0};
@@ -137,11 +140,13 @@ function finish(completed){
     rows=R.res.length>1?R.res.map((r,i)=>res(`Satz ${i+1}`,`${r.laps} Runden`)).join('')+res('Gesamt',`${sum} Runden`):res(`Runden in ${fmt(c.dur)}`,sum)}
   else rows=res('Work gesamt',fmt(R.workTotal))+res('Workouts insgesamt',D.count);
   $('#fT').textContent=title;$('#fS').textContent=sub;setLed($('#ledF'),led);$('#fR').innerHTML=rows;
+  $('#fSp').innerHTML=lapMode(m)?splitsHTML(R.res):'';
   $('#fUndo').classList.toggle('hide',!R.undo);
   $('#fin').classList.add('show');syncState()}
 function undoFinish(){
   if(!R.undo||!R.done)return;const u=R.undo;R.undo=null;
   D.count=Math.max(0,D.count-1);saveCount();
+  if(R.saved){D.results.shift();saveResults();R.saved=false}
   R.res.pop();R.workTotal-=u.el;R.laps.pop();R.t0=u.t0;R.done=false;R.last=null;
   $('#fin').classList.remove('show');$('#run').style.setProperty('--led',LED.work);R.infoKey='';
   syncState();audioInit();SND.lap();wake();loop()}

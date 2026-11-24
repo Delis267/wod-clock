@@ -26,11 +26,12 @@ wod-clock/
 │   ├── main.js            # Einstieg: lädt die Screens, Theme, Service Worker
 │   ├── util.js            # Helfer: DOM, Zeitformat, localStorage
 │   ├── led.js             # 7-Segment-Anzeige
-│   ├── state.js           # Einstellungen, Favoriten, Verlauf, Zähler
+│   ├── state.js           # Einstellungen, Ergebnisse, Favoriten, Verlauf, Zähler
 │   ├── workout.js         # Fachlogik ohne DOM: Modi, Bezeichnungen, Ablauf
 │   ├── sound.js           # Töne, Vibration, Bildschirm wach halten
 │   ├── wheel.js           # Scrollrad-Dialog
 │   ├── setup.js           # Screen „Timer einstellen“
+│   ├── splits.js          # Rundenzeiten und Kurzfassung eines Ergebnisses
 │   ├── saved.js           # Screen „Gespeichert“
 │   └── run.js             # laufender Timer und Ergebnis-Screen
 ├── docs/

@@ -1,5 +1,5 @@
 /* wod-clock service worker: works offline after the first visit */
-const CACHE = 'wod-clock-v2';
+const CACHE = 'wod-clock-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS = [
   './js/wheel.js',
   './js/setup.js',
   './js/saved.js',
+  './js/splits.js',
   './js/run.js',
   './manifest.webmanifest',
   './icons/icon.svg',
