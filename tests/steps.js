@@ -73,6 +73,15 @@ step(/^ich tippe Runden bei (.+)$/,(w,list)=>{
   const workStart=w.startAt+w.s.prep*1000;
   for(const z of list.split(/,\s*|\s+und\s+/)){const t=workStart+sec(z)*1000;
     ok(t>=w.clock.now(),`${z} liegt in der Vergangenheit`);w.clock.tick(t-w.clock.now());w.tapClock()}});
+/* Zeitfelder im Screen „Timer einstellen“, benannt wie in der App */
+const PICK={Dauer:'dur','Time Cap':'cap',Intervall:'every',Work:'work',Rest:'rest'};
+const pickBtn=(w,name)=>{ok(PICK[name],`Unbekanntes Zeitfeld „${name}“`);const b=w.$(`#body [data-pick$=".${PICK[name]}"]`);ok(b,`Kein Zeitfeld „${name}“`);return b};
+step('ich {string} im Scrollrad auf {zeit} stelle',(w,name,z)=>{
+  pickBtn(w,name).click();w.clock.tick(32);
+  const [wm,ws]=w.$$('#wheels .wheel'),s=sec(z);ok(wm&&ws,'Das Scrollrad ist nicht offen');
+  wm.scrollTop=Math.floor(s/60)*44;ws.scrollTop=(s%60)/5*44;w.$('#shOk').click()});
+step(['zeigt das Feld {string} {zeit}','das Feld {string} zeigt {zeit}','zeigt das Feld {string} {string}','das Feld {string} zeigt {string}'],(w,name,v)=>{
+  const b=pickBtn(w,name);eq(b.querySelector('.v,.val').textContent.trim(),v,`Feld „${name}“`)});
 step('ich auf das × von Runde {int} tippe',(w,n)=>{const b=w.$(`#rInfo [data-del="${n-1}"]`);ok(b,`Kein × bei Runde ${n}`);b.click()});
 
 /* ---------- Prüfungen: Uhr ---------- */
