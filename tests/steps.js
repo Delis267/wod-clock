@@ -50,6 +50,8 @@ step('Tabata ist eingestellt auf {int} Sekunden Work, {int} Sekunden Rest und {i
 step(['AMRAP dauert {int} Minuten','AMRAP dauert {int} Minute'],(w,n)=>w.set(s=>{s.cfg.amrap.dur=n*60}));
 step('AMRAP hat {int} Sätze mit {int} Sekunden Rest dazwischen',(w,sets,setRest)=>w.set(s=>Object.assign(s.cfg.amrap,{sets,setRest})));
 step('For Time hat kein Cap und kein Rundenziel',w=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds:0})));
+step('For Time hat {int} Runden als Ziel und {int} Minuten Cap',(w,rounds,cap)=>w.set(s=>Object.assign(s.cfg.fortime,{cap:cap*60,rounds})));
+step('For Time hat kein Rundenziel und {int} Minuten Cap',(w,cap)=>w.set(s=>Object.assign(s.cfg.fortime,{cap:cap*60,rounds:0})));
 step('For Time hat {int} Runden als Ziel und kein Cap',(w,rounds)=>w.set(s=>Object.assign(s.cfg.fortime,{cap:0,rounds})));
 step('der Verlauf enthält {int} Workouts',(w,n)=>{w.set(()=>{});w.store.hist=Array.from({length:n},(_,i)=>({mode:'emom',cfg:{every:60,rounds:5+i}}))});
 step('die Ergebnisliste enthält {int} Workouts',(w,n)=>{w.set(()=>{});
@@ -96,6 +98,21 @@ step(['lautet der Hinweis {string}','der Hinweis lautet {string}'],(w,t)=>{const
 step(['gibt es unter der Uhr keine Knöpfe','unter der Uhr sind keine Knöpfe'],w=>eq(w.ctlButtons().join(', '),'','Knöpfe unter der Uhr'));
 step(['ist unter der Uhr nur der Knopf {string} zu sehen','unter der Uhr ist nur der Knopf {string} zu sehen'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knöpfe unter der Uhr'));
 step(['steht auf dem Knopf {string}','auf dem Knopf steht {string}'],(w,t)=>eq(w.ctlButtons().join(', '),t,'Knopf unter der Uhr'));
+
+/* ---------- Prüfungen: Ablauf-Leiste in der Uhr ---------- */
+/* data-*-Haken: #rProg trägt data-elapsed/data-total (Sekunden) bzw. data-done (Runden), die Abschnitte data-block */
+const fmtZ=s=>`${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,'0')}`;
+const KIND={work:'Work',rest:'Rest',setrest:'Rest'};
+const prog=w=>{const p=w.$('#rProg');ok(p&&w.visible(p)&&p.querySelector('[data-block]'),'Keine Ablauf-Leiste zu sehen');return p};
+step(['zeigt die Ablauf-Leiste die Abschnitte {string}','die Ablauf-Leiste zeigt die Abschnitte {string}'],(w,list)=>
+  eq([...prog(w).querySelectorAll('[data-block]')].map(b=>`${KIND[b.dataset.kind]} ${fmtZ(+b.dataset.dur)}`).join(', '),list,'Abschnitte der Ablauf-Leiste'));
+step(['hat die Ablauf-Leiste {int} Abschnitte','die Ablauf-Leiste hat {int} Abschnitte'],(w,n)=>eq(prog(w).querySelectorAll('[data-block]').length,n,'Abschnitte der Ablauf-Leiste'));
+step(['steht die Ablauf-Leiste bei {zeit} von {zeit}','die Ablauf-Leiste steht bei {zeit} von {zeit}'],(w,a,b)=>{const p=prog(w);
+  eq(`${fmtZ(+p.dataset.elapsed)} von ${fmtZ(+p.dataset.total)}`,`${a} von ${b}`,'Stand der Ablauf-Leiste')});
+step(/^(?:zeigt die Ablauf-Leiste Rundenstriche bei|die Ablauf-Leiste zeigt Rundenstriche bei) (.+)$/,(w,list)=>
+  eq([...prog(w).querySelectorAll('[data-tick]')].map(t=>fmtZ(+t.dataset.tick)).join(', '),list.split(/,\s*|\s+und\s+/).join(', '),'Rundenstriche'));
+step(['sind in der Ablauf-Leiste {int} Runden erledigt','in der Ablauf-Leiste sind {int} Runden erledigt'],(w,n)=>eq(prog(w).dataset.done,String(n),'Erledigte Runden in der Ablauf-Leiste'));
+step(['gibt es keine Ablauf-Leiste','es gibt keine Ablauf-Leiste'],w=>{const p=w.$('#rProg');ok(!p||!w.visible(p)||!p.querySelector('[data-block]'),'Es ist eine Ablauf-Leiste zu sehen')});
 
 /* ---------- Prüfungen: Rundenliste ---------- */
 step(['ist Runde {int} zum Löschen markiert','Runde {int} ist zum Löschen markiert'],(w,n)=>{

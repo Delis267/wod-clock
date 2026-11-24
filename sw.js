@@ -14,6 +14,7 @@ const ASSETS = [
   './js/setup.js',
   './js/saved.js',
   './js/splits.js',
+  './js/progress.js',
   './js/run.js',
   './manifest.webmanifest',
   './icons/icon.svg',

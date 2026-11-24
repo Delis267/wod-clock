@@ -32,6 +32,7 @@ wod-clock/
 │   ├── wheel.js           # Scrollrad-Dialog
 │   ├── setup.js           # Screen „Timer einstellen“
 │   ├── splits.js          # Rundenzeiten und Kurzfassung eines Ergebnisses
+│   ├── progress.js        # Ablauf-Leiste in der laufenden Uhr
 │   ├── saved.js           # Screen „Gespeichert“
 │   └── run.js             # laufender Timer und Ergebnis-Screen
 ├── docs/

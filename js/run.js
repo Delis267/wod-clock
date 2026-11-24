@@ -4,6 +4,7 @@ import {$,fmt,ledTime,clone} from './util.js';
 import {setLed} from './led.js';
 import {S,D,save,saveHist,saveCount,saveResults} from './state.js';
 import {splitsHTML} from './splits.js';
+import {progModel,progSVG,ticksSVG,progUpdate} from './progress.js';
 import {lapMode,keyOf,notation,build} from './workout.js';
 import {audioInit,audioResume,audioSleep,SND,vib,wake,unwake} from './sound.js';
 import {renderSetup} from './setup.js';
@@ -24,6 +25,10 @@ function start(){
   const m=S.mode,c=clone(S.cfg[m]);
   const k=keyOf(m,c);D.hist=[{mode:m,cfg:c},...D.hist.filter(h=>keyOf(h.mode,h.cfg)!==k)].slice(0,10);saveHist();
   R={active:true,m,c,seg:build(m,c,S.prep),i:0,t0:performance.now(),paused:false,pAt:0,laps:[],res:[],done:false,last:null,half:false,arm:0,workTotal:0,undo:null,doneArm:0};
+  /* Ablauf-Leiste: Startpunkt jedes Abschnitts in Sekunden ab Beginn des Workouts (Countdown zählt nicht) */
+  let a=0;R.off=R.seg.map(x=>{const o=a;if(x.k!=='prep'&&isFinite(x.dur))a+=x.dur;return o});
+  R.prog=progModel(m,c,R.seg);R.progKey='';
+  $('#rProg').innerHTML=R.prog?progSVG(R.prog):'';$('#rProg').classList.toggle('hide',!R.prog);$('#run').classList.toggle('hasprog',!!R.prog);
   $('#rTitle').textContent=notation(m,c);
   $('#cG').classList.toggle('hide',!(m==='tabata'||m==='emom'||(m==='fortime'&&c.rounds)));
   $('#lR').textContent=lapMode(m)?'Runden':'Runde';$('#lG').textContent=m==='fortime'?'Ziel':'von';
@@ -63,7 +68,7 @@ function draw(s,el,rem){
   setLed($('#ledR'),String(rv).padStart(2,' '));if(gv)setLed($('#ledG'),String(gv).padStart(2,' '));
   $('#rCtl').classList.toggle('off',s.k!=='work');
   const ctlOn=m==='fortime'&&s.k==='work';$('#rCtl').toggleAttribute('inert',!ctlOn);$('#rCtl').setAttribute('aria-hidden',String(!ctlOn));
-  setPhase(s);
+  setPhase(s);drawProg(s,el);
   let fr='';
   if(R.paused)fr='Pausiert';
   else if(s.k==='prep')fr='Gleich geht’s los';
@@ -87,6 +92,17 @@ function draw(s,el,rem){
     $('#rInfo').innerHTML=h;
     const nw=$('#rInfo .list2');if(nw)nw.scrollTop=top}
 }
+/* Ablauf-Leiste: pro Frame nur Dimmung und Jetzt-Strich; Rundenstriche nur neu, wenn sich Runden ändern */
+function drawProg(s,el){
+  const p=R.prog;if(!p)return;const pe=$('#rProg');
+  if(p.kind==='rounds')return progUpdate(pe,p,R.laps.length);
+  progUpdate(pe,p,s.k==='prep'?0:R.off[R.i]+el);
+  if(!lapMode(R.m))return;
+  const key=`${R.res.length}|${R.laps.length}|${R.i}`;if(key===R.progKey)return;R.progKey=key;
+  /* abgeschlossene Sätze aus R.res (je Work-Abschnitt einer), der laufende aus R.laps */
+  const wo=R.seg.flatMap((x,i)=>x.k==='work'?[R.off[i]]:[]);
+  const ts=R.res.flatMap((r,j)=>r.times.map(t=>wo[j]+t)).concat(s.k==='work'?R.laps.map(t=>R.off[R.i]+t):[]);
+  pe.querySelector('.pticks').innerHTML=ticksSVG(p,ts)}
 /* Phase oben in der Uhr: WORK oder REST, im Countdown leer */
 function setPhase(s){const t=$('#lT'),txt=s.k==='work'?'WORK':(s.k==='prep'?'':'REST');if(t.textContent!==txt)t.textContent=txt}
 function redraw(){const s=R.seg[R.i],el=segEl();draw(s,el,s.dur-el)}
