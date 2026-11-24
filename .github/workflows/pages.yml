@@ -1,5 +1,6 @@
 # Prüft wod-clock mit den Specs (tests/features) und veröffentlicht die App bei jedem Push auf main auf GitHub Pages.
-# Bei Pull Requests laufen nur die Specs, es wird nichts veröffentlicht.
+# Bei Pull Requests laufen nur die Specs, es wird nichts veröffentlicht. Sind sie grün, werden die Screenshots für die
+# README neu erzeugt und bei Änderungen auf den PR-Branch committet (screenshots.yml).
 # Einmalig einstellen: Settings → Pages → Build and deployment → Source: "GitHub Actions"
 name: Specs und Deploy
 
@@ -27,6 +28,14 @@ jobs:
       # Chrome ist auf den GitHub-Runnern vorinstalliert (/usr/bin/google-chrome)
       - name: Akzeptanztests ausführen
         run: node tests/run.js --alle
+
+  # Nur für Branches in diesem Repository: Bei PRs aus Forks darf der GITHUB_TOKEN nicht pushen.
+  screenshots:
+    needs: test
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+    uses: ./.github/workflows/screenshots.yml
 
   build:
     needs: test

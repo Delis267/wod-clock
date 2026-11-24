@@ -1,33 +1,35 @@
-# Hält die Screenshots in der README aktuell: Nach jedem Push auf main, der die Oberfläche betrifft, werden sie mit
-# tests/screenshots.js neu erzeugt. Hat sich ein Bild geändert, committet die Action es auf main.
-# Commits mit dem GITHUB_TOKEN starten keine weiteren Workflows, es entsteht also keine Schleife.
+# Hält die Screenshots in der README aktuell. Erzeugt sie mit tests/screenshots.js neu und committet geänderte Bilder
+# auf den Branch, auf dem der Lauf gestartet wurde. So sieht man sie im Pull Request und prüft sie mit.
+#
+# Wann es läuft:
+# - in jedem Pull Request nach grünen Specs, aufgerufen aus pages.yml („Specs und Deploy“)
+# - von Hand unter Actions → Screenshots → Run workflow, für einen beliebigen Branch
+#
+# Gut zu wissen:
+# - Commits mit dem GITHUB_TOKEN starten keine weiteren Workflows. Es gibt keine Schleife, aber der Bot-Commit im
+#   Pull Request hat auch keinen eigenen Haken der Specs. Er ändert nur Bilder in screenshots/.
+# - Wurde der Branch während des Laufs weiter gepusht, schlägt der Push fehl. Der nächste Lauf holt es nach.
+# - Nach einem Bot-Commit vor dem nächsten eigenen Push erst die Bilder holen (git pull).
 name: Screenshots
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - index.html
-      - css/**
-      - js/**
-      - tests/lib/scenes.js
-      - tests/lib/clock.js
-      - tests/screenshots.js
+  workflow_call:
   workflow_dispatch:
-
-permissions:
-  contents: write
-
-concurrency:
-  group: screenshots
-  cancel-in-progress: true
 
 jobs:
   screenshots:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: write
+    concurrency:
+      group: screenshots-${{ github.head_ref || github.ref_name }}
+      cancel-in-progress: true
     steps:
+      # im Pull Request den Branch selbst auschecken (nicht den Merge-Commit), damit der Commit dort landet
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
@@ -45,4 +47,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add screenshots
           git commit -m "Screenshots aktualisieren"
-          git push
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
