@@ -96,12 +96,17 @@ fotografieren (iPhone-Größe, Dunkelmodus). Datum und Uhrzeit sind fest, deshal
 sich die Oberfläche nicht ändert. Ein neues Bild braucht eine Szene in `scenes.js` und einen Eintrag in `SHOTS` in
 `tests/screenshots.js`.
 
-In jedem Pull Request erzeugt `.github/workflows/screenshots.yml` die Bilder neu, sobald die Specs grün sind, und
-committet geänderte Bilder als „Screenshots aktualisieren“ auf den PR-Branch. So sieht man sie im Diff und prüft sie
-mit, und auf `main` landet nur, was reviewt wurde. Lokal muss man sie also nicht selbst aktualisieren.
+In jedem Pull Request erzeugt der Job `test` in `.github/workflows/pages.yml` die Bilder direkt nach den Specs neu,
+im selben Durchlauf. Specs und Bilder nutzen denselben Stand: den Merge aus Branch und aktuellem `main`, also das, was
+nach dem Merge auf `main` liegt. Geänderte Bilder landen als „Screenshots aktualisieren“ auf dem PR-Branch. So sieht
+man sie im Diff und prüft sie mit, und auf `main` entstehen keine Bot-Commits. Lokal muss man sie nicht selbst
+aktualisieren.
+
+- Bilder entstehen nur bei grünen Specs. Scheitert nur ihr Push (etwa weil parallel gepusht wurde), bleibt `test`
+  grün mit einer Warnung, der nächste Lauf holt es nach.
 
 - Vor dem nächsten eigenen Push nach so einem Commit erst `git pull`.
 - Der Bot-Commit startet keine Workflows (Regel von GitHub für den `GITHUB_TOKEN`) und hat daher keinen eigenen
   Haken der Specs. Er ändert nur Bilder.
 - Bei Pull Requests aus Forks läuft der Schritt nicht, dort darf die Action nicht pushen.
-- Von Hand für jeden Branch: Actions → Screenshots → Run workflow.
+- Von Hand für jeden Branch: Actions → Screenshots → Run workflow (`.github/workflows/screenshots.yml`).
