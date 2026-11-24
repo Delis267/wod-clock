@@ -1,26 +1,14 @@
-# Hält die Screenshots in der README aktuell: Nach jedem Push auf main, der die Oberfläche betrifft, werden sie mit
-# tests/screenshots.js neu erzeugt. Hat sich ein Bild geändert, committet die Action es auf main.
-# Commits mit dem GITHUB_TOKEN starten keine weiteren Workflows, es entsteht also keine Schleife.
+# Erzeugt die Screenshots für die README von Hand neu, für einen beliebigen Branch:
+# Actions → Screenshots → Run workflow → Branch wählen. Geänderte Bilder werden auf diesen Branch committet.
+# Im normalen Ablauf ist das nicht nötig: In jedem Pull Request erzeugt „Specs und Deploy“ (pages.yml) die Bilder
+# nach grünen Specs automatisch.
 name: Screenshots
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - index.html
-      - css/**
-      - js/**
-      - tests/lib/scenes.js
-      - tests/lib/clock.js
-      - tests/screenshots.js
   workflow_dispatch:
 
 permissions:
   contents: write
-
-concurrency:
-  group: screenshots
-  cancel-in-progress: true
 
 jobs:
   screenshots:
@@ -38,11 +26,13 @@ jobs:
         run: node tests/screenshots.js
 
       - name: Geänderte Screenshots committen
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
           # status statt diff, damit auch neu hinzugekommene Bilder erkannt werden
           if [ -z "$(git status --porcelain -- screenshots)" ]; then echo "Screenshots sind aktuell."; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add screenshots
+          git add -A screenshots
           git commit -m "Screenshots aktualisieren"
-          git push
+          git push origin "HEAD:refs/heads/$BRANCH"

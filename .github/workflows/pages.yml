@@ -1,5 +1,7 @@
 # Prüft wod-clock mit den Specs (tests/features) und veröffentlicht die App bei jedem Push auf main auf GitHub Pages.
-# Bei Pull Requests laufen nur die Specs, es wird nichts veröffentlicht.
+# Bei Pull Requests wird nichts veröffentlicht. Dort laufen die Specs auf dem Stand nach dem Merge (Branch + aktueller
+# main). Sind sie grün, werden aus genau diesem Stand die Screenshots für die README erzeugt und bei Änderungen auf
+# den PR-Branch committet.
 # Einmalig einstellen: Settings → Pages → Build and deployment → Source: "GitHub Actions"
 name: Specs und Deploy
 
@@ -12,12 +14,21 @@ on:
 permissions:
   contents: read
 
+# Pro Pull Request zählt nur der neueste Lauf; Läufe auf main werden nie abgebrochen
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
+    # Schreibrecht nur für den Screenshot-Commit im Pull Request
+    permissions:
+      contents: write
     steps:
+      # im Pull Request: Merge-Commit aus Branch und aktuellem main, also der Stand nach dem Merge
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -27,6 +38,35 @@ jobs:
       # Chrome ist auf den GitHub-Runnern vorinstalliert (/usr/bin/google-chrome)
       - name: Akzeptanztests ausführen
         run: node tests/run.js --alle
+
+      # Nur nach grünen Specs (ein roter Schritt bricht den Job ab) und nur für Branches in diesem Repository:
+      # Bei PRs aus Forks darf der GITHUB_TOKEN nicht pushen.
+      - name: Screenshots erzeugen
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: node tests/screenshots.js
+
+      # Der Merge-Commit lässt sich nicht pushen. Deshalb: Bilder beiseitelegen, Branch auschecken, Bilder hinein,
+      # nur bei Änderungen committen. Scheitert nur das (z. B. weil parallel gepusht wurde), bleibt der Job grün:
+      # „test“ soll eindeutig für die Specs stehen. Der nächste Lauf holt es nach.
+      # Commits mit dem GITHUB_TOKEN starten keine Workflows, es gibt also keine Schleife.
+      - name: Screenshots auf den PR-Branch committen
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          cp -r screenshots/. "$tmp/"
+          git fetch --depth=1 origin "refs/heads/$BRANCH"
+          git checkout -f -B "$BRANCH" FETCH_HEAD
+          rm -rf screenshots && mkdir screenshots && cp -r "$tmp/." screenshots/
+          if [ -z "$(git status --porcelain -- screenshots)" ]; then echo "Screenshots sind aktuell."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A screenshots
+          git commit -m "Screenshots aktualisieren"
+          git push origin "HEAD:refs/heads/$BRANCH" || { echo "::warning::Screenshots konnten nicht gepusht werden (Branch wurde inzwischen geändert?). Der nächste Lauf holt es nach."; exit 1; }
 
   build:
     needs: test
