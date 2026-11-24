@@ -2,7 +2,9 @@
 import {$} from './util.js';
 
 export const FIELDS={work:'Work',rest:'Rest',setRest:'Rest zwischen Sätzen',dur:'Dauer',every:'Intervall',cap:'Time Cap',prep:'Countdown'};
-const MIN={work:5,rest:0,setRest:0,dur:30,every:10,cap:0,prep:0};
+/* Was das Rad anbietet, gilt auch: Minimum ist der kleinste Schritt (5 s). 0 bleibt nur, wo es etwas bedeutet:
+   kein Rest, kein Time Cap, kein Countdown. Kurze Zeiten sind im Training selten sinnvoll, aber praktisch zum Testen. */
+const STEP=5,ZERO_OK=new Set(['rest','setRest','cap','prep']);
 
 let sheetCb=null,wM=null,wS=null;
 function wheel(items,val){
@@ -18,12 +20,12 @@ function wheel(items,val){
 /* öffnet den Dialog; cb bekommt den gewählten Wert in Sekunden */
 export function openWheel(field,val,cb){
   const box=$('#wheels');box.innerHTML='';
-  const mins=Array.from({length:60},(_,i)=>({v:i,l:i})),secs=Array.from({length:12},(_,i)=>({v:i*5,l:String(i*5).padStart(2,'0')}));
-  wM=wheel(mins,Math.floor(val/60));wS=wheel(secs,Math.round((val%60)/5)*5);
+  const mins=Array.from({length:60},(_,i)=>({v:i,l:i})),secs=Array.from({length:60/STEP},(_,i)=>({v:i*STEP,l:String(i*STEP).padStart(2,'0')}));
+  wM=wheel(mins,Math.floor(val/60));wS=wheel(secs,Math.round((val%60)/STEP)*STEP);
   wM.setAttribute('aria-label','Minuten');wS.setAttribute('aria-label','Sekunden');
   const u=t=>{const s=document.createElement('span');s.className='unit';s.textContent=t;return s};
   box.append(wM,u('min'),wS,u('s'));
-  $('#shT').textContent=FIELDS[field]||'Zeit';sheetCb=v=>{const mn=MIN[field]??0;cb(v===0&&field==='cap'?0:Math.max(mn,v))};
+  $('#shT').textContent=FIELDS[field]||'Zeit';sheetCb=v=>cb(ZERO_OK.has(field)?v:Math.max(STEP,v));
   $('#sheet').classList.add('show');setTimeout(()=>wM.focus({preventScroll:true}),50)}
 function closeSheet(){$('#sheet').classList.remove('show');sheetCb=null}
 
