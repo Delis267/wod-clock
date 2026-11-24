@@ -1,0 +1,48 @@
+# Hält die Screenshots in der README aktuell: Nach jedem Push auf main, der die Oberfläche betrifft, werden sie mit
+# tests/screenshots.js neu erzeugt. Hat sich ein Bild geändert, committet die Action es auf main.
+# Commits mit dem GITHUB_TOKEN starten keine weiteren Workflows, es entsteht also keine Schleife.
+name: Screenshots
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - css/**
+      - js/**
+      - tests/lib/scenes.js
+      - tests/lib/clock.js
+      - tests/screenshots.js
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: screenshots
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Chrome ist auf den GitHub-Runnern vorinstalliert (/usr/bin/google-chrome)
+      - name: Screenshots erzeugen
+        run: node tests/screenshots.js
+
+      - name: Geänderte Screenshots committen
+        run: |
+          # status statt diff, damit auch neu hinzugekommene Bilder erkannt werden
+          if [ -z "$(git status --porcelain -- screenshots)" ]; then echo "Screenshots sind aktuell."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add screenshots
+          git commit -m "Screenshots aktualisieren"
+          git push

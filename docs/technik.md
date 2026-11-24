@@ -41,12 +41,13 @@ wod-clock/
 │   ├── features/          # Specs als .feature-Dateien
 │   ├── steps.js           # Glue-Code: verbindet jeden Satz mit der App
 │   ├── run.js             # startet Test-Server und Chrome, gibt das Ergebnis aus
-│   └── lib/               # Mini-Gherkin-Parser, simulierte Uhr, Runner-Seite
+│   ├── screenshots.js     # erzeugt die Bilder in screenshots/ neu
+│   └── lib/               # Mini-Gherkin-Parser, simulierte Uhr, Runner-Seite, Screenshot-Szenen
 ├── sw.js                  # Service Worker für Offline-Nutzung
 ├── manifest.webmanifest   # Name, Icons, Vollbild für den Home-Bildschirm
 ├── .nojekyll              # nur nötig, falls ohne Actions direkt aus dem Branch veröffentlicht wird
 ├── icons/                 # App-Icons und Favicon
-├── screenshots/           # Bilder für die README
+├── screenshots/           # Bilder für die README (erzeugt, nicht von Hand bearbeiten)
 ├── README.md
 └── LICENSE
 ```
@@ -80,3 +81,21 @@ Settings → Pages → Source: **Deploy from a branch**, Branch `main`, Ordner `
 Dann bei jedem Update in `sw.js` die Versionsnummer von Hand erhöhen, z. B. `wod-clock-v3`.
 Die Specs laufen in diesem Fall nicht automatisch.
 </details>
+
+## Screenshots
+
+Die Bilder in `screenshots/` werden aus der echten App erzeugt, nicht von Hand gemacht:
+
+```
+node tests/screenshots.js             # alle Bilder
+node tests/screenshots.js ergebnis    # nur Bilder mit „ergebnis“ im Namen
+```
+
+Jedes Bild ist eine Szene in `tests/lib/scenes.js`: Einstellungen setzen, die App mit der simulierten Uhr bedienen,
+fotografieren (iPhone-Größe, Dunkelmodus). Datum und Uhrzeit sind fest, deshalb bleiben die Bilder gleich, solange
+sich die Oberfläche nicht ändert. Ein neues Bild braucht eine Szene in `scenes.js` und einen Eintrag in `SHOTS` in
+`tests/screenshots.js`.
+
+Der Workflow `.github/workflows/screenshots.yml` erzeugt die Bilder nach jedem Push auf `main`, der `index.html`,
+`css/` oder `js/` ändert, neu und committet sie, wenn sich etwas geändert hat. Lokal muss man sie also nicht
+selbst aktualisieren.
