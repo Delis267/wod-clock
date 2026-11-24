@@ -49,6 +49,7 @@ wod-clock/
 ├── .nojekyll              # nur nötig, falls ohne Actions direkt aus dem Branch veröffentlicht wird
 ├── icons/                 # App-Icons und Favicon
 ├── screenshots/           # Bilder für die README (erzeugt, nicht von Hand bearbeiten)
+├── VERSION                # Major.Minor, von Hand; Patch zählt das Deploy
 ├── README.md
 └── LICENSE
 ```
@@ -76,7 +77,18 @@ in `sw.js` (Commit-Hash). So kommt das Update auf dem Handy an:
 - Die App lädt sich danach einmal neu, aber nie während eines Workouts oder auf dem Ergebnis-Screen.
 - Ausgeliefert wird nur aus dem Cache der aktiven Version, alte und neue Dateien mischen sich nicht.
 
-Welche Version läuft, steht unter „Gespeichert“ unter den Einstellungen (Commit-Hash).
+Welche Version läuft, steht unter „Gespeichert“ unter den Einstellungen, z. B. „Version 1.4.2“.
+
+### Versionsnummer
+
+Die Version hat die Form Major.Minor.Patch:
+
+- **Major.Minor** steht in der Datei `VERSION` (z. B. `1.4`) und wird von Hand geändert, gern im Pull Request
+  zu einer größeren Änderung.
+- **Patch** zählt das Deploy selbst: die Änderungen auf `main` seit der letzten Änderung an `VERSION`.
+  Nach dem Merge, der `VERSION` auf `1.5` setzt, läuft also `1.5.0`, danach `1.5.1`, `1.5.2` und so weiter.
+
+Die Nummer ist zugleich der Name des Offline-Caches in `sw.js`, gesetzt vom Workflow `pages.yml`.
 
 **Neue Datei angelegt?** Dann an zwei Stellen eintragen, sonst fehlt sie online bzw. offline:
 in `sw.js` unter `ASSETS` und, falls sie in einem neuen Ordner liegt, im `cp`-Befehl von `pages.yml`.

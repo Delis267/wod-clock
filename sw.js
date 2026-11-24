@@ -1,5 +1,5 @@
 /* wod-clock service worker: works offline after the first visit.
-   Jede Version hat ihren eigenen, vollständigen Cache (Name = Commit, gesetzt vom Deploy). Ausgeliefert wird nur aus
+   Jede Version hat ihren eigenen, vollständigen Cache (Name = Versionsnummer, gesetzt vom Deploy). Ausgeliefert wird nur aus
    diesem Cache, so gibt es nie ein Gemisch aus alten und neuen Dateien. Neue Versionen erkennt js/main.js. */
 const CACHE = 'wod-clock-v4';
 const ASSETS = [

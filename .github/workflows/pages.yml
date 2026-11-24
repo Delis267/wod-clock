@@ -73,15 +73,31 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
+      # ganze Historie, damit die Versionsnummer gezählt werden kann
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Version = Major.Minor aus der Datei VERSION (von Hand) + Anzahl der Änderungen auf main seit der letzten
+      # Änderung an VERSION (automatisch). VERSION 1.4 → 1.4.0, 1.4.1, 1.4.2 …; neue Minor/Major beginnt wieder bei 0.
+      # --first-parent: zählt Merges und direkte Pushes auf main, nicht die einzelnen Commits eines Pull Requests.
+      - name: Version bestimmen
+        run: |
+          base="$(tr -d '[:space:]' < VERSION)"
+          echo "$base" | grep -Eq '^[0-9]+\.[0-9]+$' || { echo "::error::VERSION muss Major.Minor enthalten, z. B. 1.4 (ist: '$base')"; exit 1; }
+          since="$(git log -1 --first-parent --format=%H -- VERSION)"
+          patch="$(git rev-list --count --first-parent "$since..HEAD")"
+          echo "APP_VERSION=$base.$patch" >> "$GITHUB_ENV"
+          echo "Version $base.$patch"
 
       - name: Seite zusammenstellen
         run: |
           mkdir -p _site
           cp index.html sw.js manifest.webmanifest _site/
           cp -r icons css js _site/
-          # Neue Cache-Version pro Commit, damit installierte Apps das Update sofort bekommen
-          sed -i "s/const CACHE = 'wod-clock-[^']*'/const CACHE = 'wod-clock-${GITHUB_SHA::7}'/" _site/sw.js
+          # Cache-Name = Version: jede Version hat ihren eigenen Cache, installierte Apps erkennen das Update sofort.
+          # Die App zeigt ihn unter „Gespeichert“ als „Version 1.4.2“ an.
+          sed -i "s/const CACHE = 'wod-clock-[^']*'/const CACHE = 'wod-clock-$APP_VERSION'/" _site/sw.js
           grep "const CACHE" _site/sw.js
 
       - uses: actions/configure-pages@v5
