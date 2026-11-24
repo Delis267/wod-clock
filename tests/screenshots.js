@@ -8,7 +8,7 @@ const http=require('http'),fs=require('fs'),path=require('path'),os=require('os'
 
 const ROOT=path.resolve(__dirname,'..'),OUT=path.join(ROOT,'screenshots');
 /* Name → Fenstergröße in CSS-Pixeln (iPhone 13), gerendert mit Faktor 2 */
-const SHOTS={einstellen:[390,844],'for-time':[390,844],'amrap-quer':[844,390],ergebnis:[390,844],ergebnisse:[390,844]};
+const SHOTS={einstellen:[390,844],'for-time':[390,560],'amrap-quer':[844,390],amrap:[390,560],emom:[390,560],tabata:[390,560],ergebnis:[390,844],ergebnisse:[390,844]};
 const filter=process.argv[2]||'';
 const TYPES={'.html':'text/html','.js':'text/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png','.svg':'image/svg+xml'};
 
