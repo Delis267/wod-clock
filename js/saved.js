@@ -32,7 +32,9 @@ function renderSaved(){
   const th=[['system','Auto'],['light','Hell'],['dark','Dunkel']];
   $('#prefs').innerHTML=`${stepper('prep','Countdown vor dem Start',S.prep,'',S.prep?S.prep+' s':'aus')}
    <div class="rowx"><span>Töne</span><button class="sw" role="switch" data-sw="sound" aria-checked="${S.sound}" aria-label="Töne"></button></div>
-   <div class="rowx"><span>Darstellung</span><span class="mini" role="group" aria-label="Darstellung">${th.map(([v,l])=>`<button data-theme="${v}" aria-pressed="${S.theme===v}">${l}</button>`).join('')}</span></div>`}
+   <div class="rowx"><span>Darstellung</span><span class="mini" role="group" aria-label="Darstellung">${th.map(([v,l])=>`<button data-theme="${v}" aria-pressed="${S.theme===v}">${l}</button>`).join('')}</span></div>`;
+  /* installierte Version = Name des Offline-Caches (z. B. wod-clock-1.4.2, gesetzt vom Deploy); ohne Service Worker leer */
+  try{caches.keys().then(k=>{const v=k.find(x=>x.startsWith('wod-clock-'));$('#ver').textContent=v?'Version '+v.slice(10):''}).catch(()=>{})}catch(e){}}
 
 function show(v){$('#vSetup').classList.toggle('hide',v!=='setup');$('#vSaved').classList.toggle('hide',v!=='saved');if(v==='saved')renderSaved();else renderSetup()}
 
