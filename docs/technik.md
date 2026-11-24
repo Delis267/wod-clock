@@ -68,9 +68,15 @@ Einmalig einrichten:
 ### Updates und Cache
 
 Datei ändern, committen, pushen. Der Workflow setzt bei jedem Deploy automatisch eine neue Cache-Version
-in `sw.js` (Commit-Hash). Installierte Apps laden das Update beim übernächsten Öffnen: Beim ersten Öffnen
-kommt noch die alte Version aus dem Cache, während die neue im Hintergrund geladen wird. Auf dem iPhone
-die App dafür ganz schließen (aus dem App-Switcher wischen) und wieder öffnen.
+in `sw.js` (Commit-Hash). So kommt das Update auf dem Handy an:
+
+- Beim Öffnen und beim Zurückholen der App fragt `js/main.js` nach einer neuen Version (iOS lädt eine
+  Home-Bildschirm-App beim Zurückholen sonst nicht neu).
+- Der neue Service Worker lädt alle Dateien am Browser-Cache vorbei in einen eigenen Cache und übernimmt.
+- Die App lädt sich danach einmal neu, aber nie während eines Workouts oder auf dem Ergebnis-Screen.
+- Ausgeliefert wird nur aus dem Cache der aktiven Version, alte und neue Dateien mischen sich nicht.
+
+Welche Version läuft, steht unter „Gespeichert“ unter den Einstellungen (Commit-Hash).
 
 **Neue Datei angelegt?** Dann an zwei Stellen eintragen, sonst fehlt sie online bzw. offline:
 in `sw.js` unter `ASSETS` und, falls sie in einem neuen Ordner liegt, im `cp`-Befehl von `pages.yml`.

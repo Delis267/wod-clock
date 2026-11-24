@@ -1,4 +1,6 @@
-/* wod-clock service worker: works offline after the first visit */
+/* wod-clock service worker: works offline after the first visit.
+   Jede Version hat ihren eigenen, vollständigen Cache (Name = Commit, gesetzt vom Deploy). Ausgeliefert wird nur aus
+   diesem Cache, so gibt es nie ein Gemisch aus alten und neuen Dateien. Neue Versionen erkennt js/main.js. */
 const CACHE = 'wod-clock-v4';
 const ASSETS = [
   './',
@@ -26,7 +28,8 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  // cache: 'reload' umgeht den HTTP-Cache des Browsers (GitHub Pages: 10 min), sonst landen alte Dateien im neuen Cache
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -37,22 +40,20 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Stale-while-revalidate: answer from cache instantly, refresh in the background.
+// Cache zuerst, sonst Netz (und merken, z. B. die Schriften von Google Fonts); offline fällt eine Navigation auf index.html zurück
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   e.respondWith(
     caches.open(CACHE).then(async cache => {
       const cached = await cache.match(req, { ignoreSearch: req.mode === 'navigate' });
-      const network = fetch(req).then(res => {
-        if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+      if (cached) return cached;
+      try {
+        const res = await fetch(req);
+        if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
         return res;
-      }).catch(() => null);
-      if (cached) { e.waitUntil(network); return cached; }
-      const res = await network;
-      if (res) return res;
-      if (req.mode === 'navigate') return cache.match('./index.html');
-      return Response.error();
+      }
+      catch (err) { return req.mode === 'navigate' ? cache.match('./index.html') : Response.error(); }
     })
   );
 });
