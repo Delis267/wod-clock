@@ -54,7 +54,7 @@ export function renderSetup(){
       `<div class="card">${stepper('fortime.rounds','Runden',c.rounds,'Optional. Stoppt nach der letzten Runde',c.rounds||'offen')}</div>`+rftViz(c)}
   $('#body').innerHTML=h;
   /* Countdown vor dem Start: gehört zum Starten, deshalb unten direkt über dem Start-Knopf; gilt für alle Modi */
-  $('#cdRow').innerHTML=`<span>Countdown</span><span class="mini" role="group" aria-label="Countdown vor dem Start">${PREP.map(v=>`<button data-prep="${v}" aria-pressed="${S.prep===v}">${v} s</button>`).join('')}</span>`;
+  $('#cdRow').innerHTML=`<span class="k"><i class="dot"></i>Countdown</span><span class="mini" role="group" aria-label="Countdown vor dem Start">${PREP.map(v=>`<button data-prep="${v}" aria-pressed="${S.prep===v}">${v} s</button>`).join('')}</span>`;
   $('#vSetup').style.setProperty('--mode',MC[m]);const fc=$('#body').querySelector('.card');if(fc)fc.classList.add('acc');
   $('#start').setAttribute('aria-label',`Start: ${notation(m,c)}`);
 }
