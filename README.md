@@ -14,36 +14,79 @@
 </p>
 
 <p align="center">
-  <img src="screenshots/einstellen.png" width="240" alt="Timer einstellen">
+  <img src="screenshots/einstellen.png" width="220" alt="Timer einstellen">
   &nbsp;
-  <img src="screenshots/for-time.png" width="240" alt="For Time mit Rundenzähler">
+  <img src="screenshots/ergebnis.png" width="220" alt="Ergebnis mit Rundenzeiten">
+  &nbsp;
+  <img src="screenshots/ergebnisse.png" width="220" alt="Ergebnisliste der letzten Workouts">
 </p>
 <p align="center">
-  <img src="screenshots/ergebnis.png" width="240" alt="AMRAP-Ergebnis mit Rundenzeiten">
-  &nbsp;
-  <img src="screenshots/ergebnisse.png" width="240" alt="Ergebnisliste der letzten Workouts">
-</p>
-<p align="center">
-  <img src="screenshots/amrap-quer.png" width="500" alt="AMRAP im Querformat">
+  <img src="screenshots/amrap-quer.png" width="520" alt="AMRAP im Querformat als Wanduhr">
 </p>
 
-## Funktionen
+## Auf einen Blick
 
-- **Vier Modi**
-  - **For Time** – Stoppuhr mit optionalem Time Cap und Rundenziel (z. B. 5 RFT), beenden mit „Fertig“
-  - **AMRAP** – Dauer frei wählbar, optional mehrere Sätze mit Rest dazwischen
-  - **EMOM** – jede Runde startet im gewählten Intervall (EMOM, E2MOM, E3MOM …)
-  - **Tabata** – Work, Rest, Runden und Sätze; Standard ist klassisch 20/10 × 8
-- **7-Segment-Wanduhr** hochkant und quer, WORK und REST groß in der Uhr, Rot für Work, Grün für Rest, Bernstein für Runden
+- **Vier Modi**: For Time, AMRAP, EMOM und Tabata, in wenigen Sekunden eingestellt
+- **Große 7-Segment-Uhr**, hochkant und quer: Rot für Work, Grün für Rest, Bernstein für Runden
+- **Runden per Tippen** auf die Uhr zählen, mit Zwischenzeit pro Runde
+- **Ergebnis nach dem Workout** mit allen Rundenzeiten, die letzten 10 bleiben gespeichert
+- **Box-Buzzer**, der über deine Musik läuft, ohne sie anzuhalten
+- **Offline-fähig** und installierbar auf dem Home-Bildschirm, hell oder dunkel
+
+## Die vier Modi
+
+<table>
+  <tr>
+    <td width="190"><img src="screenshots/for-time.png" width="170" alt="For Time"></td>
+    <td>
+      <h3>For Time</h3>
+      Die Uhr läuft hoch, bis du fertig bist. Tippen zählt eine Runde, die Liste zeigt jede Zwischenzeit,
+      die schnellste Runde ist markiert. Optional mit Time Cap und Rundenziel (z. B. 5 RFT).
+      Ohne Ziel beendest du mit „Fertig“, mit Bestätigung gegen versehentliches Tippen.
+    </td>
+  </tr>
+  <tr>
+    <td width="190"><img src="screenshots/amrap.png" width="170" alt="AMRAP"></td>
+    <td>
+      <h3>AMRAP</h3>
+      So viele Runden wie möglich in fester Zeit. Die Uhr läuft herunter, Tippen zählt eine Runde.
+      Dauer frei wählbar, optional mehrere Sätze mit Rest dazwischen.
+    </td>
+  </tr>
+  <tr>
+    <td width="190"><img src="screenshots/emom.png" width="170" alt="EMOM"></td>
+    <td>
+      <h3>EMOM</h3>
+      Jede Runde startet im gewählten Intervall, was übrig bleibt, ist dein Rest.
+      Auch als E2MOM, E3MOM und so weiter. Die Uhr zeigt Runde und verbleibende Gesamtzeit.
+    </td>
+  </tr>
+  <tr>
+    <td width="190"><img src="screenshots/tabata.png" width="170" alt="Tabata"></td>
+    <td>
+      <h3>Tabata</h3>
+      Work und Rest im Wechsel, Rot und Grün schon von weitem zu erkennen.
+      Work, Rest, Runden und Sätze einstellbar, Standard ist klassisch 20/10 × 8.
+    </td>
+  </tr>
+</table>
+
+## Während des Workouts
+
 - **Uhr antippen**
   - AMRAP / For Time: Tippen zählt eine Runde, lange halten pausiert
   - EMOM / Tabata und jeder Countdown: Tippen pausiert
-  - Zwischenzeiten pro Runde, schnellste Runde markiert, Fehltipps per × aus der Liste löschen
-  - nach dem Workout stehen die Rundenzeiten auch im Ergebnis
-- **Box-Buzzer**: 3-2-1-Piepen, Buzzer bei Start und Ende, Doppelpiep 10 s vor Schluss; läuft über deine Musik, ohne sie anzuhalten
-- **Gespeichert**: Workout-Zähler, Ergebnisse der letzten 10 fertigen Workouts (mit aufklappbaren Rundenzeiten), Favoriten und die letzten 10 Timer in CrossFit-Kurzschreibweise
-- **Hell- und Dunkelmodus** (automatisch oder fest), läuft ohne Scrollen auf dem Handy
-- **Offline-fähig** nach dem ersten Aufruf, installierbar auf dem Home-Bildschirm
+- **Fehltipp?** Runde per × aus der Liste löschen, sie verschmilzt mit der nächsten
+- **Box-Buzzer**: 3-2-1-Piepen, Buzzer bei Start und Ende, Doppelpiep 10 s vor Schluss
+- **Querformat**: Handy quer legen, die Uhr füllt den Bildschirm wie eine Wanduhr
+
+## Nach dem Workout
+
+- **Ergebnis** mit Zeit oder Runden und allen Rundenzeiten, bei mehreren Sätzen nach Satz gruppiert
+- **Ergebnisse**: die letzten 10 fertigen Workouts mit Datum, Rundenzeiten zum Aufklappen.
+  Abgebrochene Workouts werden nicht gespeichert.
+- **Verlauf und Favoriten**: die letzten 10 Timer in CrossFit-Kurzschreibweise, mit einem Tipp wieder geladen
+- **Workout-Zähler** für alle geschafften Workouts
 
 ## Auf dem Handy installieren
 
@@ -57,8 +100,10 @@ Signaltöne kommen in dieser Zeit aber nicht, denn iOS hält Web-Apps im Hinterg
 
 ## Weitere Doku
 
-- [Technik](docs/technik.md) – Aufbau, Projektstruktur, Veröffentlichen auf GitHub Pages
+- [Technik](docs/technik.md) – Aufbau, Projektstruktur, Veröffentlichen auf GitHub Pages, Screenshots
 - [Tests](docs/tests.md) – Teststrategie und Beispiel
+
+Die Screenshots in dieser README werden automatisch aus der echten App erzeugt und bleiben so immer aktuell.
 
 ## Lizenz
 

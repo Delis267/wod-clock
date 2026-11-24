@@ -19,6 +19,9 @@
     einstellen:{s:{mode:'tabata',cfg:{tabata:{sets:2}}}},
     'for-time':{s:{mode:'fortime',cfg:{fortime:{cap:0,rounds:5}}},run(){start('For Time');laps(['2:08','4:12','6:19'],'6:42')}},
     'amrap-quer':{s:{mode:'amrap'},run(){start('AMRAP');laps(['1:05','2:19','3:17'],'3:43')}},
+    amrap:{s:{mode:'amrap'},run(){start('AMRAP');laps(['1:48','3:41','5:30'],'6:12')}},
+    emom:{s:{mode:'emom'},run(){start('EMOM');tick(3*60+37)}},
+    tabata:{s:{mode:'tabata'},run(){start('Tabata');tick(2*30+20+4)}},
     ergebnis:{s:{mode:'amrap',cfg:{amrap:{dur:600}}},run(){start('AMRAP');laps(['1:52','3:51','5:58','8:02'],'10:00')}},
     ergebnisse:{s:{},store:{count:24,results:[
       {mode:'fortime',cfg:{cap:0,rounds:5},at:FIXED-36e5,res:[{el:612,laps:5,times:[118,239,358,484,612]}],work:612},
